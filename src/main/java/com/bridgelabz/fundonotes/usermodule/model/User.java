@@ -12,7 +12,16 @@ public class User {
 	private String userEmail;
 	private String phoneNumber;
 	private String password;
+	private boolean status;
 	
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
+	}
+
 	public User() {
 		super();
 	}

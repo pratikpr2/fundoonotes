@@ -2,64 +2,88 @@ package com.bridgelabz.fundonotes.usermodule.services;
 
 import java.util.Optional;
 
+import javax.security.auth.login.LoginException;
+import javax.xml.bind.DatatypeConverter;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
+import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
 import com.bridgelabz.fundonotes.usermodule.model.User;
-import com.bridgelabz.fundonotes.usermodule.repository.MongoRepository;
+import com.bridgelabz.fundonotes.usermodule.repository.UserRepository;
+import com.bridgelabz.fundonotes.usermodule.token.JwtToken;
 import com.bridgelabz.fundonotes.usermodule.utility.Utility;
 
-@Service
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+
+@Component
 public class UserServiceImpl implements UserService {
 
 	@Autowired 
-	MongoRepository mongoRepo;
+	UserRepository mongoRepo;
+	
+	@Autowired
+	UserMailService mailservice;
 	
 	@Override
-	public User login(String emailId, String password) {
+	public void login(LoginDTO logUser) throws LoginException {
 		// TODO Auto-generated method stub
-		Optional<User> user = mongoRepo.findById(emailId);
-		if(user!=null) {
-			if(user.get().getPassword().equals(password)) {
-				User loginuser =new User();
-				loginuser.setUserId(user.get().getUserId());
-				loginuser.setUserName(user.get().getUserName());
-				loginuser.setUserEmail(user.get().getUserEmail());
-				loginuser.setPhoneNumber(user.get().getPhoneNumber());
-				loginuser.setPassword(user.get().getPassword());
+		Utility.validateLoginUser(logUser);
+		Optional<User> user = mongoRepo.findById(logUser.getEmail());
+		if(!user.isPresent()) {
+			throw new LoginException("User With Email "+logUser.getEmail()+" Not Registered");
 			
-				return loginuser;
-			}
-			else
-				return null;
 		}
-		else
-			return null;
+		if(!user.get().getPassword().equals(logUser.getPassword())) {
+			throw new LoginException("Wrong Password  ");
+		}
+		
 	}
 
 	@Override
-	public boolean register(RegistrationDTO regUser) throws RegistrationException{
+	public void register(RegistrationDTO regUser) throws RegistrationException{
 		// TODO Auto-generated method stub
-		boolean flag = Utility.validateLoginUser(regUser);
+		Utility.validateRegUser(regUser);
 		Optional<User> checkuser = mongoRepo.findById(regUser.getEmailId());
-		if(flag && !checkuser.isPresent()) {
-			User user = new User();
-			user.setUserId("2");
-			user.setUserName(regUser.getUserName());
-			user.setUserEmail(regUser.getEmailId());
-			user.setPhoneNumber(regUser.getPhoneNumber());
-			user.setPassword(regUser.getPassword());
-			
-			mongoRepo.save(user);
-			
-			return true;
+		System.out.println(checkuser.isPresent());
+		if(checkuser.isPresent()) {
+			throw new RegistrationException("User with Email "+ regUser.getEmailId()+" already Exists");
 		}
-		else {
-			return false;
-}
+		User user = new User();
+		user.setUserName(regUser.getUserName());
+		user.setUserEmail(regUser.getEmailId());
+		user.setPhoneNumber(regUser.getPhoneNumber());
+		user.setPassword(regUser.getPassword());
+		mongoRepo.save(user);
+		
+		JwtToken jwt = new JwtToken();
+		String currentJwt = jwt.createJWT(user);
+		
+		mailservice.activateUser(currentJwt, user);
+		//Utility.sendActivationLink(currentJwt, user);
+	}
+
+	@Override
+	public boolean activateUser(String token) throws RegistrationException{
+		// TODO Auto-generated method stub
+		boolean flag=true;
+		Claims claim = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("PRATIK")).parseClaimsJws(token).getBody();
+		Optional<User> user =  mongoRepo.findById(claim.getSubject());
+		
+		if(!user.isPresent()) {
+			flag=false;
+			throw new RegistrationException("Invalid User");
+		}
+		user.get().setStatus(true);
+		mongoRepo.save(user.get());
+		return flag;
 	}
 	
 

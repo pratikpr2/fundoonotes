@@ -1,17 +1,34 @@
 package com.bridgelabz.fundonotes.usermodule.utility;
 
+import java.util.Optional;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.security.auth.login.LoginException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
+import com.bridgelabz.fundonotes.usermodule.model.User;
+import com.bridgelabz.fundonotes.usermodule.repository.UserRepository;
 
+@Service
 public class Utility {
 
+	
+	@Autowired 
+	UserRepository mongoRepo;
+	
 	private static final String CONTACT_PATTERN = "^[0-9]{10}$";
 	//private static final String KEY="todoapp";
 	
-	public static boolean validateLoginUser(RegistrationDTO registrationDto) throws RegistrationException{
+	public static boolean validateRegUser(RegistrationDTO registrationDto) throws RegistrationException{
 		boolean flag = false;
 		if(registrationDto.getUserName()==null || registrationDto.getUserName().length()<3) {
 			throw new RegistrationException("User Name should Have atleast 3 Characters");
@@ -39,4 +56,47 @@ public class Utility {
 			throw new LoginException("Invalid Password");
 		}
 	}
+	
+	public static void sendActivationLink(String jwToken,User user) {
+		String from ="simranbodra9619"; //Mail User Name
+		String pass ="Simran@4"; //password
+
+		String to = user.getUserEmail();
+		System.out.println(to);
+		String subject = "Account Activation";
+		
+		String body = "Click here to ativate account:\n\n"
+				+"http://114.79.180.62:8080/Fundonotes/activateaccount/token=?"+jwToken;
+		
+		Properties props = System.getProperties();
+		String host = "smtp.gmail.com";
+		
+		props.put("mail.smtp.starttls.enable", "true");
+
+		props.put("mail.smtp.ssl.trust", host);
+		props.put("mail.smtp.user", from);
+		props.put("mail.smtp.password", pass);
+		props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.auth", "true");
+
+		Session session = Session.getInstance(props);
+		MimeMessage message = new MimeMessage(session);
+
+		try {
+			message.setFrom(new InternetAddress(from));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+			message.setSubject(subject);
+			message.setText(body);
+			Transport transport = session.getTransport("smtp");
+			transport.connect(host, from, pass);
+			transport.sendMessage(message, message.getAllRecipients());
+			transport.close();
+		} 
+		catch (Exception ae) {
+			ae.printStackTrace();
+		}
+		
+	}
+	
+	
 }
