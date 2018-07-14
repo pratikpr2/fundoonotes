@@ -8,41 +8,42 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
-import com.bridgelabz.fundonotes.usermodule.model.Response;
+import com.bridgelabz.fundonotes.usermodule.model.ResponseDto;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler{
 
+	
 	private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 	@ExceptionHandler(RegistrationException.class)
-	public ResponseEntity<Response> handleRegistartionException(RegistrationException exception){
+	public ResponseEntity<ResponseDto> handleRegistartionException(RegistrationException exception){
 		logger.info("Error Occured While Registration"+ exception.getMessage(),exception);
 	
-		Response response = new Response();
-		
-		response.setMessage(exception.getMessage());
-		response.setStatus(0);
-		
-		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
-	}
-	
-	@ExceptionHandler
-	public ResponseEntity<Response> handleLoginException(LoginException exception){
-		logger.info("Error Ocuured While Login"+ exception.getMessage(),exception);
-		
-		Response response = new Response();
+		ResponseDto response = new ResponseDto();
 		
 		response.setMessage(exception.getMessage());
 		response.setStatus(1);
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}
-	@ExceptionHandler
-	public ResponseEntity<Response> handleOtherException(Exception exception){
+	
+	@ExceptionHandler(LoginException.class)
+	public ResponseEntity<ResponseDto> handleLoginException(LoginException exception){
+		logger.info("Error Ocuured While Login"+ exception.getMessage(),exception);
+		
+		ResponseDto response = new ResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(0);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ResponseDto> handleOtherException(Exception exception){
 		logger.info("Error Occured: "+exception.getMessage(),exception);
 		
-		Response response = new Response();
+		ResponseDto response = new ResponseDto();
 		
 		response.setMessage(exception.getMessage());
 		response.setStatus(-1);

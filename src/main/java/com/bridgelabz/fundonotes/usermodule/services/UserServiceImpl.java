@@ -2,13 +2,11 @@ package com.bridgelabz.fundonotes.usermodule.services;
 
 import java.util.Optional;
 
+import javax.mail.MessagingException;
 import javax.security.auth.login.LoginException;
 import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
@@ -20,10 +18,9 @@ import com.bridgelabz.fundonotes.usermodule.token.JwtToken;
 import com.bridgelabz.fundonotes.usermodule.utility.Utility;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 
-@Component
+@Service
 public class UserServiceImpl implements UserService {
 
 	@Autowired 
@@ -48,7 +45,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void register(RegistrationDTO regUser) throws RegistrationException{
+	public void register(RegistrationDTO regUser) throws RegistrationException ,MessagingException{
 		// TODO Auto-generated method stub
 		Utility.validateRegUser(regUser);
 		Optional<User> checkuser = mongoRepo.findById(regUser.getEmailId());
@@ -66,7 +63,7 @@ public class UserServiceImpl implements UserService {
 		JwtToken jwt = new JwtToken();
 		String currentJwt = jwt.createJWT(user);
 		
-		mailservice.activateUser(currentJwt, user);
+		mailservice.sendMail(currentJwt, user);
 		//Utility.sendActivationLink(currentJwt, user);
 	}
 

@@ -1,22 +1,43 @@
 package com.bridgelabz.fundonotes.usermodule.services;
 
-import java.util.Properties;
-
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.swing.text.html.MinimalHTMLWriter;
 
-import org.springframework.stereotype.Service;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 import com.bridgelabz.fundonotes.usermodule.model.User;
 
-@Service
+@Component
 public class UserMailServiceImpl implements UserMailService {
 
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	
 	@Override
-	public void activateUser(String token, User user) {
+	public void sendMail(String token, User user) throws MessagingException {
+		// TODO Auto-generated method stub
+		System.out.println("into mail");
+		MimeMessage msg = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(msg);
+		String to = user.getUserEmail();
+		String subject = "Account Activation";
+		String text = "Click here to activate account:\n\n"
+				+"http://192.168.0.71:8080/Fundonotes/activateaccount/?token="+token;
+		//SimpleMailMessage msg = new SimpleMailMessage();
+		helper.setTo(to);
+		helper.setSubject(subject);
+		helper.setText(text);
+		mailSender.send(msg);
+		
+	}
+
+	/*@Override
+	public void sendMail(String token, User user) {
 		// TODO Auto-generated method stub
 		String from ="simranbodra9619"; //Mail User Name
 		String pass ="Simran@4"; //password
@@ -26,7 +47,7 @@ public class UserMailServiceImpl implements UserMailService {
 		String subject = "Account Activation";
 		
 		String body = "Click here to activate account:\n\n"
-				+"http://114.79.180.62:8080/Fundonotes/activateaccount/token=?"+token;
+				+"http://192.168.0.71/Fundonotes/activateaccount/token=?"+token;
 		
 		Properties props = System.getProperties();
 		String host = "smtp.gmail.com";
@@ -56,6 +77,6 @@ public class UserMailServiceImpl implements UserMailService {
 			ae.printStackTrace();
 		}
 		
-	}
+	}*/
 }
 

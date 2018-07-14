@@ -1,8 +1,7 @@
 package com.bridgelabz.fundonotes.usermodule.controller;
 
+import javax.mail.MessagingException;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
-import com.bridgelabz.fundonotes.usermodule.model.User;
+import com.bridgelabz.fundonotes.usermodule.model.ResponseDto;
 import com.bridgelabz.fundonotes.usermodule.services.UserService;
 
 @RestController
@@ -32,13 +31,15 @@ public class UserController {
 	//-------------------Login--------------------------
 	
 	@RequestMapping(value="/login", method=RequestMethod.POST)
-	public ResponseEntity<String> login(@RequestBody LoginDTO checkUser) throws LoginException {
+	public ResponseEntity<ResponseDto> login(@RequestBody LoginDTO checkUser) throws LoginException {
 	
 		
 		userService.login(checkUser);
 		
-		String message = "Hello "+checkUser.getEmail()+ " Login SuccessFul";
-		return new ResponseEntity<String>(message,HttpStatus.OK);
+		ResponseDto response = new ResponseDto();
+		 response.setMessage("SuccessFully LoggedIn");
+		 response.setStatus(1);
+		return new ResponseEntity<ResponseDto>(response,HttpStatus.OK);
 		
 	}
 	
@@ -46,27 +47,32 @@ public class UserController {
 	
 	
 	@RequestMapping(value="/register",method = RequestMethod.POST)
-	public ResponseEntity<String> register(@RequestBody RegistrationDTO regUser) throws RegistrationException{
+	public ResponseEntity<ResponseDto> register(@RequestBody RegistrationDTO regUser) throws RegistrationException, MessagingException{
 		
 		
 		userService.register(regUser);
 		
 		logger.info("User registered with : {}",regUser.getEmailId());
-		String message = " Successfully Registered";
-		
-		return new ResponseEntity<String>(message,HttpStatus.OK);
+		ResponseDto response = new ResponseDto();
+		response.setMessage("SuccessFully Registered");
+		response.setStatus(1);
+		return new ResponseEntity<ResponseDto>(response,HttpStatus.OK);
 	}
+	//-------------------Activate Account-------------------
+	
 	@RequestMapping(value="/activateaccount",method = RequestMethod.GET)
-	public ResponseEntity<String> activateaccount(@RequestParam(value="token")String token) throws RegistrationException {
+	public ResponseEntity<ResponseDto> activateaccount(@RequestParam(value="token")String token) throws RegistrationException {
 		//System.out.println(hsr.getQueryString());
 		//String token = hsr.getQueryString();
-
+		ResponseDto response = new ResponseDto();
 		if (userService.activateUser(token)) {
-			String messege = "Account activated successfully";
-			return new ResponseEntity<String>(messege, HttpStatus.OK);
+			response.setMessage("Account Activated SuccesFully");
+			response.setStatus(1);
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		} else {
-			String msg = "Account not activated";
-			return new ResponseEntity<String>(msg, HttpStatus.FORBIDDEN);
+			response.setMessage("Failed To Activate Account");
+			response.setStatus(0);
+			return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
 		}
 }
 	

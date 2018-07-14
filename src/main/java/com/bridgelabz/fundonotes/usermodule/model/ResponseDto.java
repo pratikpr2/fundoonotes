@@ -1,6 +1,6 @@
 package com.bridgelabz.fundonotes.usermodule.model;
 
-public class Response {
+public class ResponseDto {
 
 	private String message;
 	private int status;
