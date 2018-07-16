@@ -7,10 +7,16 @@ import javax.security.auth.login.LoginException;
 import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bridgelabz.fundonotes.usermodule.exception.ActivationException;
+import com.bridgelabz.fundonotes.usermodule.exception.ChangePassException;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
+import com.bridgelabz.fundonotes.usermodule.model.ChangePassDTO;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
+import com.bridgelabz.fundonotes.usermodule.model.MailDTO;
+import com.bridgelabz.fundonotes.usermodule.model.MailUser;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
 import com.bridgelabz.fundonotes.usermodule.model.User;
 import com.bridgelabz.fundonotes.usermodule.repository.UserRepository;
@@ -29,17 +35,24 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	UserMailService mailservice;
 	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	
 	@Override
 	public void login(LoginDTO logUser) throws LoginException {
 		// TODO Auto-generated method stub
 		Utility.validateLoginUser(logUser);
 		Optional<User> user = mongoRepo.findById(logUser.getEmail());
+		
 		if(!user.isPresent()) {
 			throw new LoginException("User With Email "+logUser.getEmail()+" Not Registered");
+		}
+		else if(!user.get().isStatus()) {
+			throw new LoginException("Please Activate Account");
 			
 		}
-		if(!user.get().getPassword().equals(logUser.getPassword())) {
-			throw new LoginException("Wrong Password  ");
+		else if(!passwordEncoder.matches(logUser.getPassword(), user.get().getPassword())) {
+			throw new LoginException("Wrong Password");
 		}
 		
 	}
@@ -57,18 +70,21 @@ public class UserServiceImpl implements UserService {
 		user.setUserName(regUser.getUserName());
 		user.setUserEmail(regUser.getEmailId());
 		user.setPhoneNumber(regUser.getPhoneNumber());
-		user.setPassword(regUser.getPassword());
+		user.setPassword(passwordEncoder.encode(regUser.getPassword()));
 		mongoRepo.save(user);
 		
 		JwtToken jwt = new JwtToken();
 		String currentJwt = jwt.createJWT(user);
 		
-		mailservice.sendMail(currentJwt, user);
+		String activationLink = "Click here to activate account:\n\n"
+				+"http://192.168.0.71:8080/Fundonotes/activateaccount/?token="+currentJwt;
+		
+		mailservice.sendMail(activationLink, user);
 		//Utility.sendActivationLink(currentJwt, user);
 	}
 
 	@Override
-	public boolean activateUser(String token) throws RegistrationException{
+	public boolean activateUser(String token) throws ActivationException {
 		// TODO Auto-generated method stub
 		boolean flag=true;
 		Claims claim = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("PRATIK")).parseClaimsJws(token).getBody();
@@ -76,11 +92,48 @@ public class UserServiceImpl implements UserService {
 		
 		if(!user.isPresent()) {
 			flag=false;
-			throw new RegistrationException("Invalid User");
+			throw new ActivationException("Invalid User");
 		}
 		user.get().setStatus(true);
 		mongoRepo.save(user.get());
 		return flag;
+	}
+
+	@Override
+	public void changePassword(ChangePassDTO reset,String token) throws ChangePassException, MessagingException, ActivationException {
+		// TODO Auto-generated method stub
+		
+		Utility.validateChangePassDto(reset);
+		Claims claim = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("PRATIK")).parseClaimsJws(token).getBody();
+		Optional<User> user = mongoRepo.findById(claim.getSubject());
+		if(!user.isPresent()) {
+			throw new ActivationException("Invalid User");
+		}
+		user.get().setPassword(passwordEncoder.encode(reset.getPassword()));
+		mongoRepo.save(user.get());
+	}
+
+	@Override
+	public void sendMail(MailUser mail) throws MessagingException, ChangePassException {
+		// TODO Auto-generated method stub
+		
+		Optional<User> checkUser = mongoRepo.findById(mail.getEmail());
+
+		if(!checkUser.isPresent()) {
+			throw new ChangePassException("User Is Not Registered");
+		}
+		
+		JwtToken jwt = new JwtToken();
+		String currentJwt = jwt.createJWT(checkUser.get());
+		
+		String mailBody = "Click here to reset Password:\n\n"
+				+"http://192.168.0.71:8080/Fundonotes/resetpassword/?token="+currentJwt;
+		
+		MailDTO usermail = new MailDTO();
+		usermail.setEmail(mail.getEmail());
+		usermail.setSubject("Password Reset");
+		usermail.setBody(mailBody);
+		mailservice.sendMailv2(mailBody, usermail);
 	}
 	
 

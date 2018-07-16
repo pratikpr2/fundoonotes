@@ -2,6 +2,9 @@ package com.bridgelabz.fundonotes.usermodule.controller;
 
 import javax.mail.MessagingException;
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +16,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bridgelabz.fundonotes.usermodule.exception.ActivationException;
+import com.bridgelabz.fundonotes.usermodule.exception.ChangePassException;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
+import com.bridgelabz.fundonotes.usermodule.model.ChangePassDTO;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
+import com.bridgelabz.fundonotes.usermodule.model.MailDTO;
+import com.bridgelabz.fundonotes.usermodule.model.MailUser;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
 import com.bridgelabz.fundonotes.usermodule.model.ResponseDto;
 import com.bridgelabz.fundonotes.usermodule.services.UserService;
@@ -33,7 +41,7 @@ public class UserController {
 	@RequestMapping(value="/login", method=RequestMethod.POST)
 	public ResponseEntity<ResponseDto> login(@RequestBody LoginDTO checkUser) throws LoginException {
 	
-		
+		System.out.println("Inside Login");
 		userService.login(checkUser);
 		
 		ResponseDto response = new ResponseDto();
@@ -60,8 +68,8 @@ public class UserController {
 	}
 	//-------------------Activate Account-------------------
 	
-	@RequestMapping(value="/activateaccount",method = RequestMethod.GET)
-	public ResponseEntity<ResponseDto> activateaccount(@RequestParam(value="token")String token) throws RegistrationException {
+	@RequestMapping(value="/activateaccount",method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> activateaccount(@RequestParam(value="token")String token) throws RegistrationException, ActivationException {
 		//System.out.println(hsr.getQueryString());
 		//String token = hsr.getQueryString();
 		ResponseDto response = new ResponseDto();
@@ -74,6 +82,33 @@ public class UserController {
 			response.setStatus(0);
 			return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
 		}
-}
+	}
+	@RequestMapping(value="/forgetpassword",method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> forgetPassword(@RequestBody MailUser user) throws ChangePassException, MessagingException{
+		
+		userService.sendMail(user);
+		ResponseDto response = new ResponseDto();
+		response.setMessage("Please Check Mail To Confirm Changing Password");
+		response.setStatus(2);
+		
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
+	@RequestMapping(value="/resetpassword",method = RequestMethod.PUT)
+	private ResponseEntity<ResponseDto> resetpassword(@RequestBody ChangePassDTO reset,@RequestParam(value="token")String token) throws ChangePassException, MessagingException, ActivationException{
+
+		ResponseDto response = new ResponseDto();
+		
+		if(!userService.activateUser(token)) {
+			response.setMessage("Failed To Change Password");
+			response.setStatus(3);
+		}
+		
+		userService.changePassword(reset,token);
+		
+		response.setMessage("Password Changed SuccessFully");
+		response.setStatus(3);
+		
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
 	
 }

@@ -1,12 +1,18 @@
 package com.bridgelabz.fundonotes.usermodule.exceptionhandler;
 
 import javax.security.auth.login.LoginException;
+
+import org.apache.catalina.connector.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import com.bridgelabz.fundonotes.usermodule.exception.ActivationException;
+import com.bridgelabz.fundonotes.usermodule.exception.ChangePassException;
+import com.bridgelabz.fundonotes.usermodule.exception.MailException;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
 import com.bridgelabz.fundonotes.usermodule.model.ResponseDto;
 
@@ -50,4 +56,40 @@ public class GlobalExceptionHandler{
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}
+	@ExceptionHandler(ChangePassException.class)
+	public ResponseEntity<ResponseDto> handleChangePassException(ChangePassException exception){
+		logger.info("Error Occured: "+exception.getMessage(),exception);
+		
+		ResponseDto response = new ResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(2);
+		
+		return new ResponseEntity<>(response,HttpStatus.CONFLICT);
+		
+	}
+	@ExceptionHandler(ActivationException.class)
+	public ResponseEntity<ResponseDto> handleActivationException(ActivationException exception){
+		logger.info("Error Occured: "+exception.getMessage(),exception);
+		
+		ResponseDto response = new ResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-2);
+		
+		return new ResponseEntity<>(response,HttpStatus.UNAUTHORIZED);
+	}
+	
+	@ExceptionHandler(MailException.class)
+	public ResponseEntity<ResponseDto> handleMailException(ActivationException exception){
+		logger.info("Error Occured: "+exception.getMessage(),exception);
+		
+		ResponseDto response = new ResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-2);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
+	
 }

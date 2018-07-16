@@ -1,7 +1,9 @@
 package com.bridgelabz.fundonotes.usermodule.model;
 
-public class LoginDTO {
+import org.springframework.data.annotation.Id;
 
+public class LoginDTO {
+	@Id
 	private String email;
 	private String password;
 	

@@ -12,8 +12,12 @@ import javax.security.auth.login.LoginException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bridgelabz.fundonotes.usermodule.exception.ChangePassException;
+import com.bridgelabz.fundonotes.usermodule.exception.MailException;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
+import com.bridgelabz.fundonotes.usermodule.model.ChangePassDTO;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
+import com.bridgelabz.fundonotes.usermodule.model.MailDTO;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
 import com.bridgelabz.fundonotes.usermodule.model.User;
 import com.bridgelabz.fundonotes.usermodule.repository.UserRepository;
@@ -40,7 +44,7 @@ public class Utility {
 			throw new RegistrationException("Password Should be of atleast 8 Characters");
 		}
 		else if(registrationDto.getConfirmPassword()==null || !registrationDto.getConfirmPassword().equals(registrationDto.getPassword())) {
-			throw new RegistrationException("Didn't Match With Password");
+			throw new RegistrationException("Confirm Password Didn't Match With Password");
 		}
 		else {
 			flag=true;
@@ -57,45 +61,24 @@ public class Utility {
 		}
 	}
 	
-	public static void sendActivationLink(String jwToken,User user) {
-		String from ="simranbodra9619"; //Mail User Name
-		String pass ="Simran@4"; //password
-
-		String to = user.getUserEmail();
-		System.out.println(to);
-		String subject = "Account Activation";
-		
-		String body = "Click here to ativate account:\n\n"
-				+"http://114.79.180.62:8080/Fundonotes/activateaccount/token=?"+jwToken;
-		
-		Properties props = System.getProperties();
-		String host = "smtp.gmail.com";
-		
-		props.put("mail.smtp.starttls.enable", "true");
-
-		props.put("mail.smtp.ssl.trust", host);
-		props.put("mail.smtp.user", from);
-		props.put("mail.smtp.password", pass);
-		props.put("mail.smtp.port", "587");
-		props.put("mail.smtp.auth", "true");
-
-		Session session = Session.getInstance(props);
-		MimeMessage message = new MimeMessage(session);
-
-		try {
-			message.setFrom(new InternetAddress(from));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-			message.setSubject(subject);
-			message.setText(body);
-			Transport transport = session.getTransport("smtp");
-			transport.connect(host, from, pass);
-			transport.sendMessage(message, message.getAllRecipients());
-			transport.close();
-		} 
-		catch (Exception ae) {
-			ae.printStackTrace();
+	public static void validateEmailDto(MailDTO maildto) throws MailException {
+		if(maildto.getEmail()==null || maildto.getEmail().length() < 3) {
+			throw new MailException("Invalid Email");
 		}
-		
+		else if(maildto.getBody()==null) {
+			throw new MailException("Mail Body Null");
+		}
+		else if(maildto.getSubject()==null) {
+			throw new MailException("Mail Subject Null");
+		}
+	}
+	public static void validateChangePassDto(ChangePassDTO changepass) throws ChangePassException {
+		if(changepass.getPassword()==null || changepass.getPassword().length() <8) {
+			throw new ChangePassException("Invalid Password");
+		}
+		else if(!changepass.getPassword().equals(changepass.getConfirmPassword())) {
+			throw new ChangePassException("Confirm Password Didn't Match with Password");
+		}
 	}
 	
 	
