@@ -22,9 +22,11 @@ import com.bridgelabz.fundonotes.usermodule.model.User;
 import com.bridgelabz.fundonotes.usermodule.repository.UserRepository;
 import com.bridgelabz.fundonotes.usermodule.token.JwtToken;
 import com.bridgelabz.fundonotes.usermodule.utility.Utility;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+
+import com.bridgelabz.fundonotes.usermodule.rabbitmq.Consumer;
+import com.bridgelabz.fundonotes.usermodule.rabbitmq.Producer;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,6 +39,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	Producer producer;
+	
+	@Autowired
+	Consumer consumer;
 	
 	@Override
 	public void login(LoginDTO logUser) throws LoginException {
@@ -79,7 +87,14 @@ public class UserServiceImpl implements UserService {
 		String activationLink = "Click here to activate account:\n\n"
 				+"http://192.168.0.71:8080/Fundonotes/activateaccount/?token="+currentJwt;
 		
-		mailservice.sendMail(activationLink, user);
+		MailDTO mailuser = new MailDTO();
+		mailuser.setEmail(user.getUserEmail());
+		mailuser.setSubject("Activate Account");
+		mailuser.setBody(activationLink);
+		
+		producer.send(mailuser);
+		
+		mailservice.sendMailv2(consumer.receiveObject());
 		//Utility.sendActivationLink(currentJwt, user);
 	}
 
@@ -133,7 +148,10 @@ public class UserServiceImpl implements UserService {
 		usermail.setEmail(mail.getEmail());
 		usermail.setSubject("Password Reset");
 		usermail.setBody(mailBody);
-		mailservice.sendMailv2(mailBody, usermail);
+		
+		producer.send(usermail);
+		
+		mailservice.sendMailv2(consumer.receiveObject());
 	}
 	
 

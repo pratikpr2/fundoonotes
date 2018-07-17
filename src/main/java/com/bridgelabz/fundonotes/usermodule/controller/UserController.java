@@ -2,9 +2,6 @@ package com.bridgelabz.fundonotes.usermodule.controller;
 
 import javax.mail.MessagingException;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,6 @@ import com.bridgelabz.fundonotes.usermodule.exception.ChangePassException;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
 import com.bridgelabz.fundonotes.usermodule.model.ChangePassDTO;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
-import com.bridgelabz.fundonotes.usermodule.model.MailDTO;
 import com.bridgelabz.fundonotes.usermodule.model.MailUser;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
 import com.bridgelabz.fundonotes.usermodule.model.ResponseDto;
@@ -60,7 +56,6 @@ public class UserController {
 		
 		userService.register(regUser);
 		
-		logger.info("User registered with : {}",regUser.getEmailId());
 		ResponseDto response = new ResponseDto();
 		response.setMessage("SuccessFully Registered");
 		response.setStatus(1);

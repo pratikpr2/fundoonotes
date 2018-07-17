@@ -10,7 +10,8 @@ import com.bridgelabz.fundonotes.usermodule.model.User;
 @Service
 public interface UserMailService {
 
+	@Deprecated
 	public void sendMail(String mailBody,User user) throws MessagingException;
 
-	public void sendMailv2(String mailBody,MailDTO user) throws MessagingException;
+	public void sendMailv2(MailDTO user) throws MessagingException;
 }

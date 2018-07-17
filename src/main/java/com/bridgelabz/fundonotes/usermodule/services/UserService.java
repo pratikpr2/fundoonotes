@@ -8,7 +8,6 @@ import com.bridgelabz.fundonotes.usermodule.exception.ChangePassException;
 import com.bridgelabz.fundonotes.usermodule.exception.RegistrationException;
 import com.bridgelabz.fundonotes.usermodule.model.ChangePassDTO;
 import com.bridgelabz.fundonotes.usermodule.model.LoginDTO;
-import com.bridgelabz.fundonotes.usermodule.model.MailDTO;
 import com.bridgelabz.fundonotes.usermodule.model.MailUser;
 import com.bridgelabz.fundonotes.usermodule.model.RegistrationDTO;
 

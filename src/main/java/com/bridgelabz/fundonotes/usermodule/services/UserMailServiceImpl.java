@@ -36,7 +36,7 @@ public class UserMailServiceImpl implements UserMailService {
 
 
 	@Override
-	public void sendMailv2(String mailBody, MailDTO user) throws MessagingException {
+	public void sendMailv2(MailDTO user) throws MessagingException {
 		// TODO Auto-generated method stub
 		MimeMessage msg = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(msg);
