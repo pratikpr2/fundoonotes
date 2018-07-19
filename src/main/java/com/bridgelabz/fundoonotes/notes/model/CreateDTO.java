@@ -1,0 +1,23 @@
+package com.bridgelabz.fundoonotes.notes.model;
+
+import java.util.Date;
+
+public class CreateDTO {
+
+	private String title;
+	private String body;
+	
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getBody() {
+		return body;
+	}
+	public void setBody(String body) {
+		this.body = body;
+	}
+	
+}

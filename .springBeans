@@ -7,7 +7,7 @@
 	</configSuffixes>
 	<enableImports><![CDATA[false]]></enableImports>
 	<configs>
-		<config>java:com.bridgelabz.fundonotes.FundoonotesApplication</config>
+		<config>java:com.bridgelabz.fundoonotes.FundoonotesApplication</config>
 	</configs>
 	<autoconfigs>
 	</autoconfigs>

@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: com.bridgelabz.fundoonotes.TestServices
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.062 s <<< FAILURE! - in com.bridgelabz.fundoonotes.TestServices
+register(com.bridgelabz.fundoonotes.TestServices)  Time elapsed: 0.017 s  <<< ERROR!
+java.lang.IllegalArgumentException: WebApplicationContext is required
+	at com.bridgelabz.fundoonotes.TestServices.setup(TestServices.java:30)
+
