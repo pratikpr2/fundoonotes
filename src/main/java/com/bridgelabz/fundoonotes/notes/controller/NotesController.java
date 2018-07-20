@@ -1,5 +1,7 @@
 package com.bridgelabz.fundoonotes.notes.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
+import com.bridgelabz.fundoonotes.notes.model.Note;
 import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
+import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.notes.services.NotesService;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
-import com.bridgelabz.fundoonotes.user.token.JwtToken;
 
 @RestController
 public class NotesController {
@@ -22,21 +26,33 @@ public class NotesController {
 	@Autowired
 	NotesService notesService;
 	
-	@Autowired
-	JwtToken jwt;
+	//------------------Create Note---------------------------
 	
 	@RequestMapping(value="/create",method= RequestMethod.POST)
-	public ResponseEntity<NoteResponseDto> createNote(@RequestBody CreateDTO createDto,@RequestParam(value = "token") String token) throws CreateDtoException, TokenParsingException{
+	public ResponseEntity<ViewNoteDto > createNote(@RequestBody CreateDTO createDto,@RequestParam(value = "token") String token) throws CreateDtoException, TokenParsingException, NoteNotFoundException{
 		
-		jwt.parseJWT(token);
 		
-		notesService.create(createDto);
+		ViewNoteDto view = notesService.create(createDto,token);
+	
+		return new ResponseEntity<>(view,HttpStatus.OK);
 		
-		NoteResponseDto response = new NoteResponseDto();
-		response.setMessage("New Note Created");
-		response.setStatus(1);
-		
-		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
+	
+	//-------------------Open Notes---------------------------
+	@RequestMapping(value="/open",method = RequestMethod.POST)
+	public ResponseEntity<List<ViewNoteDto>> openNotes(@RequestParam(value="token") String token) throws TokenParsingException, NoteNotFoundException{
+		
+		List<ViewNoteDto> notes = notesService.openAllNotes(token);
+		 
+		return new ResponseEntity<List<ViewNoteDto>>(notes,HttpStatus.OK);
+	}
+	
+	//------------------Edit Notes-----------------------------
+	@RequestMapping(value="/edit",method = RequestMethod.POST)
+	public ResponseEntity<NoteResponseDto> editNotes(@RequestParam(value="token") String token) {
+		
+		notesService.editNote(token,editNoteDto);
+	}
+	
 	
 }

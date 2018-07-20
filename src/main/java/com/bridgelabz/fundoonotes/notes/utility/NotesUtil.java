@@ -19,6 +19,12 @@ public class NotesUtil {
 		if(createDto.getBody()==null) {
 			throw new CreateDtoException("Note Body Empty");
 		}
+		if(createDto.getColor()==null) {
+			throw new CreateDtoException("Please set a color");
+		}
+		if(createDto.getReminder()==null) {
+			throw new CreateDtoException("Please set a reminder");
+		}
 	}
 	
 }

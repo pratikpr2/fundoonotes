@@ -27,7 +27,7 @@ public class JwtToken {
 	public String createJWT(User user) {
 		// The JWT signature algorithm we will be using to sign the token
 
-		String subject = user.getUserEmail();
+		String subject = user.getUserId();
 		String issuer = user.getUserName();
 		Date now = new Date();
 		// Let's set the JWT Claims
@@ -46,14 +46,31 @@ public class JwtToken {
 	public void parseJWT(String jwt) throws TokenParsingException{
 
 		// This line will throw an exception if it is not a signed JWS (as expected)
-		      try {
-		    	  Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(KEY)).parseClaimsJws(jwt)
+		Claims claims;
+		
+		try {
+		    	 claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(KEY)).parseClaimsJws(jwt)
 				.getBody();
-		      }
+		    }
 		      catch(Exception exception) {
 		    	  throw new TokenParsingException("Malformed Token");
 		      }
 		      
 		
 	}
+	
+	public String getUserId(String jwt) throws TokenParsingException {
+		Claims claims;
+		try {
+			claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(KEY)).parseClaimsJws(jwt)
+					.getBody();
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			throw new TokenParsingException("Malformed Token");
+		}
+		return  claims.getSubject();
+	}
+	
+	
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.fundoonotes.user.exception.ActivationException;
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
+import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 import com.bridgelabz.fundoonotes.user.model.ChangePassDTO;
 import com.bridgelabz.fundoonotes.user.model.LoginDTO;
 import com.bridgelabz.fundoonotes.user.model.MailUser;
@@ -42,8 +43,6 @@ public class UserController {
 		
 		return new ResponseEntity<ResponseDto>(response, HttpStatus.OK);
 
-		// generate token
-
 	}
 
 	// ----------------Register---------------------------
@@ -64,20 +63,18 @@ public class UserController {
 
 	@RequestMapping(value = "/activateaccount", method = RequestMethod.POST)
 	public ResponseEntity<ResponseDto> activateaccount(@RequestParam(value = "token") String token)
-			throws RegistrationException, ActivationException {
+			throws RegistrationException, ActivationException, TokenParsingException {
 		// System.out.println(hsr.getQueryString());
 		// String token = hsr.getQueryString();
 		ResponseDto response = new ResponseDto();
-		if (userService.activateUser(token)) {
-			response.setMessage("Account Activated SuccesFully");
-			response.setStatus(1);
-			return new ResponseEntity<>(response, HttpStatus.OK);
-		} else {
-			response.setMessage("Failed To Activate Account");
-			response.setStatus(0);
-			return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-		}
+		userService.activateUser(token);
+		response.setMessage("Account Activated SuccesFully");
+		response.setStatus(1);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+		
 	}
+	
+	//----------------------Forget PassWord----------------------
 
 	@RequestMapping(value = "/forgetpassword", method = RequestMethod.POST)
 	public ResponseEntity<ResponseDto> forgetPassword(@RequestBody MailUser user)
@@ -90,21 +87,20 @@ public class UserController {
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	//----------------------Reset PassWord------------------------
 
 	@RequestMapping(value = "/resetpassword", method = RequestMethod.PUT)
 	private ResponseEntity<ResponseDto> resetpassword(@RequestBody ChangePassDTO reset,
 			@RequestParam(value = "token") String token)
-			throws ChangePassException, MessagingException, ActivationException {
+			throws ChangePassException, MessagingException, ActivationException, TokenParsingException {
 
-		ResponseDto response = new ResponseDto();
+		
 
-		if (!userService.activateUser(token)) {
-			response.setMessage("Failed To Change Password");
-			response.setStatus(3);
-		}
-
+		userService.activateUser(token);
 		userService.changePassword(reset, token);
-
+		
+		ResponseDto response = new ResponseDto();
 		response.setMessage("Password Changed SuccessFully");
 		response.setStatus(3);
 

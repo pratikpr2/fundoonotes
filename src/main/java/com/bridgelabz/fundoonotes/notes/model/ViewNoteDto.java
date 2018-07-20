@@ -8,7 +8,7 @@ public class ViewNoteDto {
 	private String body;
 	private Date createdAt;
 	private Date lastModified;
-	private Date Reminder;
+	private String Reminder;
 	
 	public String getTitle() {
 		return title;
@@ -34,10 +34,10 @@ public class ViewNoteDto {
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
-	public Date getReminder() {
+	public String getReminder() {
 		return Reminder;
 	}
-	public void setReminder(Date reminder) {
+	public void setReminder(String reminder) {
 		Reminder = reminder;
 	}
 	

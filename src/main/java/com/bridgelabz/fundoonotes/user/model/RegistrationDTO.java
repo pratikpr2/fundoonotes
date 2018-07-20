@@ -1,12 +1,9 @@
 package com.bridgelabz.fundoonotes.user.model;
 
-import org.springframework.data.annotation.Id;
-
 
 public class RegistrationDTO {
 
 	private String userName;
-	@Id
 	private String emailId;
 	private String phoneNumber;
 	private String password;

@@ -1,12 +1,24 @@
 package com.bridgelabz.fundoonotes.notes.model;
 
-import java.util.Date;
-
 public class CreateDTO {
 
 	private String title;
 	private String body;
+	private String color;
+	private String Reminder;
 	
+	public String getColor() {
+		return color;
+	}
+	public void setColor(String color) {
+		this.color = color;
+	}
+	public String getReminder() {
+		return Reminder;
+	}
+	public void setReminder(String reminder) {
+		Reminder = reminder;
+	}
 	public String getTitle() {
 		return title;
 	}

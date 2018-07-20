@@ -4,8 +4,6 @@ import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.security.auth.login.LoginException;
-import javax.xml.bind.DatatypeConverter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,20 +11,17 @@ import org.springframework.stereotype.Service;
 import com.bridgelabz.fundoonotes.user.exception.ActivationException;
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
+import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 import com.bridgelabz.fundoonotes.user.model.ChangePassDTO;
 import com.bridgelabz.fundoonotes.user.model.LoginDTO;
 import com.bridgelabz.fundoonotes.user.model.MailDTO;
 import com.bridgelabz.fundoonotes.user.model.MailUser;
 import com.bridgelabz.fundoonotes.user.model.RegistrationDTO;
 import com.bridgelabz.fundoonotes.user.model.User;
-import com.bridgelabz.fundoonotes.user.rabbitmq.ConsumerService;
 import com.bridgelabz.fundoonotes.user.rabbitmq.ProducerService;
 import com.bridgelabz.fundoonotes.user.repository.UserRepository;
 import com.bridgelabz.fundoonotes.user.token.JwtToken;
 import com.bridgelabz.fundoonotes.user.utility.Utility;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -50,7 +45,7 @@ public class UserServiceImpl implements UserService {
 	public void login(LoginDTO logUser) throws LoginException {
 		// TODO Auto-generated method stub
 		Utility.validateLoginUser(logUser);
-		Optional<User> user = mongoRepo.findById(logUser.getEmail());
+		Optional<User> user = mongoRepo.findByUserEmail(logUser.getEmail());
 		
 		if(!user.isPresent()) {
 			throw new LoginException("User With Email "+logUser.getEmail()+" Not Registered");
@@ -81,7 +76,7 @@ public class UserServiceImpl implements UserService {
 		// TODO Auto-generated method stub
 		Utility.validateRegUser(regUser);
 		
-		Optional<User> checkuser = mongoRepo.findById(regUser.getEmailId());
+		Optional<User> checkuser = mongoRepo.findByUserEmail(regUser.getEmailId());
 		//System.out.println(checkuser.isPresent());
 		
 		if(checkuser.isPresent()) {
@@ -112,29 +107,26 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean activateUser(String token) throws ActivationException {
+	public void activateUser(String token) throws ActivationException, TokenParsingException {
 		// TODO Auto-generated method stub
-		boolean flag=true;
-		Claims claim = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("PRATIK")).parseClaimsJws(token).getBody();
-		Optional<User> user =  mongoRepo.findById(claim.getSubject());
+		Optional<User> user =  mongoRepo.findById(jwt.getUserId(token));
 		
 		if(!user.isPresent()) {
-			flag=false;
-			throw new ActivationException("Invalid User");
+			throw new ActivationException("Account Activation failed");
 		}
 		
 		user.get().setStatus(true);
 		mongoRepo.save(user.get());
-		return flag;
+	
 	}
 
 	@Override
-	public void changePassword(ChangePassDTO reset,String token) throws ChangePassException, MessagingException, ActivationException {
+	public void changePassword(ChangePassDTO reset,String token) throws ChangePassException, MessagingException, ActivationException, TokenParsingException {
 		// TODO Auto-generated method stub
 		
 		Utility.validateChangePassDto(reset);
-		Claims claim = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("PRATIK")).parseClaimsJws(token).getBody();
-		Optional<User> user = mongoRepo.findById(claim.getSubject());
+	
+		Optional<User> user = mongoRepo.findById(jwt.getUserId(token));
 		
 		if(!user.isPresent()) {
 			throw new ActivationException("Invalid User");
@@ -148,7 +140,7 @@ public class UserServiceImpl implements UserService {
 	public void sendMail(MailUser mail) throws MessagingException, ChangePassException {
 		// TODO Auto-generated method stub
 		
-		Optional<User> checkUser = mongoRepo.findById(mail.getEmail());
+		Optional<User> checkUser = mongoRepo.findByUserEmail(mail.getEmail());
 
 		if(!checkUser.isPresent()) {
 			throw new ChangePassException("User Is Not Registered");

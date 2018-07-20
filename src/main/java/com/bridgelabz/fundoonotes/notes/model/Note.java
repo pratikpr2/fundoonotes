@@ -13,7 +13,7 @@ public class Note {
 	private String body;
 	private Date createdAt;
 	private Date lastModified;
-	private Date Reminder;
+	private String Reminder;
 	
 	public String getUserId() {
 		return userId;
@@ -45,10 +45,10 @@ public class Note {
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
-	public Date getReminder() {
+	public String getReminder() {
 		return Reminder;
 	}
-	public void setReminder(Date reminder) {
+	public void setReminder(String reminder) {
 		Reminder = reminder;
 	}
 	public String getNoteId() {
