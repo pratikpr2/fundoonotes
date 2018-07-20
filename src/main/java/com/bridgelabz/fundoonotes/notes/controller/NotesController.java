@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
+import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.Note;
 import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
@@ -48,11 +50,29 @@ public class NotesController {
 	}
 	
 	//------------------Edit Notes-----------------------------
-	@RequestMapping(value="/edit",method = RequestMethod.POST)
-	public ResponseEntity<NoteResponseDto> editNotes(@RequestParam(value="token") String token) {
+	@RequestMapping(value="/edit",method = RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> editNotes(@RequestParam(value="token") String token,@RequestParam(value="noteId") String noteId ,@RequestBody EditNoteDto editNoteDto) throws TokenParsingException, EditDtoException, NoteNotFoundException {
 		
-		notesService.editNote(token,editNoteDto);
+		notesService.editNote(token,editNoteDto,noteId);
+		
+		NoteResponseDto response = new NoteResponseDto();
+		response.setMessage("Notes Updated");
+		response.setStatus(1);
+		
+		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
+	//------------------Delete Notes---------------------------
 	
+	@RequestMapping(value="/delete",method = RequestMethod.POST)
+	public ResponseEntity<NoteResponseDto> deleteNote(@RequestParam(value="token") String token,@RequestParam(value="noteId") String noteId) throws TokenParsingException, NoteNotFoundException{
+		
+		notesService.delete(token,noteId);
+		
+		NoteResponseDto response = new NoteResponseDto();
+		response.setMessage("Note Deleted SuccessFully");
+		response.setStatus(1);
+		
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
 }

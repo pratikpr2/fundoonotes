@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
+import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.Note;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.notes.repositories.NotesRepository;
@@ -40,6 +42,7 @@ public class NotesServiceImpl implements NotesService {
 		note.setBody(createDto.getBody());
 		note.setCreatedAt(NotesUtil.generateDate());
 		note.setLastModified(NotesUtil.generateDate());
+		note.setColor(createDto.getColor());
 		note.setReminder(createDto.getReminder());
 		
 		notesrepo.save(note);
@@ -79,17 +82,24 @@ public class NotesServiceImpl implements NotesService {
 	}
 
 	@Override
-	public void delete() {
+	public void delete(String token,String noteId) throws TokenParsingException, NoteNotFoundException {
 		// TODO Auto-generated method stub
+		jwt.parseJWT(token);
+		
+		Optional<Note> note = notesrepo.findById(noteId);
+		
+		if(!note.isPresent()) {
+			throw new NoteNotFoundException("No Note with such Id");
+		}
+		if(!note.get().getUserId().equals(jwt.getUserId(token))) {
+			throw new NoteNotFoundException("No Notes For the Current User");
+		}
+		
+		notesrepo.deleteById(noteId);
 		
 	}
 
-	@Override
-	public void edit() {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
 	@Override
 	public List<ViewNoteDto> openAllNotes(String token) throws TokenParsingException, NoteNotFoundException {
 		// TODO Auto-generated method stub
@@ -117,6 +127,30 @@ public class NotesServiceImpl implements NotesService {
 		}
 		
 		return notesList;
+	}
+
+	@Override
+	public void editNote(String token, EditNoteDto editNoteDto,String noteId) throws TokenParsingException, EditDtoException, NoteNotFoundException {
+		// TODO Auto-generated method stub
+		
+		NotesUtil.validateEditNoteDto(editNoteDto);
+		
+		jwt.parseJWT(token);
+		
+		Optional<Note> note = notesrepo.findById(noteId);
+		if(!note.isPresent()) {
+			throw new NoteNotFoundException("No Notes with such Id found");
+		}
+		if(!note.get().getUserId().equals(jwt.getUserId(token))) {
+			throw new NoteNotFoundException("No Notes For the Current User");
+		}
+		note.get().setTitle(editNoteDto.getTitle());
+		note.get().setBody(editNoteDto.getBody());
+		note.get().setReminder(editNoteDto.getReminder());
+		note.get().setColor(editNoteDto.getColor());
+		note.get().setLastModified(NotesUtil.generateDate());
+		
+		notesrepo.save(note.get());
 	}
 
 }

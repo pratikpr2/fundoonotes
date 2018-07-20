@@ -33,7 +33,19 @@ public class GlobalNotesException {
 		NoteResponseDto response = new NoteResponseDto();
 		
 		response.setMessage(exception.getMessage());
-		response.setStatus(1);
+		response.setStatus(0);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(EditDtoException.class)
+	public ResponseEntity<NoteResponseDto> handleRegistartionException(EditDtoException exception){
+		logger.error("Error Occured While Editing Notes: "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-1);
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}

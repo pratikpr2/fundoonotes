@@ -2,11 +2,13 @@ package com.bridgelabz.fundoonotes.notes.model;
 
 import java.util.Date;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection="notes")
 public class Note {
 
+	@Id
 	private String noteId;
 	private String userId;
 	private String title;
@@ -14,6 +16,7 @@ public class Note {
 	private Date createdAt;
 	private Date lastModified;
 	private String Reminder;
+	private String color;
 	
 	public String getUserId() {
 		return userId;
@@ -56,6 +59,12 @@ public class Note {
 	}
 	public void setNoteId(String noteId) {
 		this.noteId = noteId;
+	}
+	public String getColor() {
+		return color;
+	}
+	public void setColor(String color) {
+		this.color = color;
 	}
 	
 	
