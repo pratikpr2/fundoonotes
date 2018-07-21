@@ -13,6 +13,7 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
 	@Autowired
 	LoggerInterceptor logInterceptor;
 	
+	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(logInterceptor).addPathPatterns("/**");
 	}

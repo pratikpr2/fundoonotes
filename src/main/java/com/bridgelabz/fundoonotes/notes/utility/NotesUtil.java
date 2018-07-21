@@ -1,10 +1,13 @@
 package com.bridgelabz.fundoonotes.notes.utility;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
+import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 
 public class NotesUtil {
@@ -15,17 +18,14 @@ public class NotesUtil {
 	}
 	
 	public static void ValidateCreateDto(CreateDTO createDto) throws CreateDtoException {
-		if(createDto.getTitle()==null || createDto.getTitle().length()==0) {
-			throw new CreateDtoException("Provide A Valid title Name");
+		if(createDto.getTitle()==null && createDto.getBody()==null) {
+			throw new CreateDtoException("Provide Valid Title Or Body");
 		}
-		if(createDto.getBody()==null) {
-			throw new CreateDtoException("Note Body Empty");
+		if(createDto.getTitle().length()==0 && createDto.getBody().length()==0) {
+			throw new CreateDtoException("Title And Body Cannot Be Empty");
 		}
-		if(createDto.getColor()==null) {
-			throw new CreateDtoException("Please set a color");
-		}
-		if(createDto.getReminder()==null) {
-			throw new CreateDtoException("Please set a reminder");
+		if(createDto.getTitle().trim().length()==0 && createDto.getBody().trim().length()==0) {
+			throw new CreateDtoException("Provide Valid Title or Body");
 		}
 	}
 
@@ -43,6 +43,16 @@ public class NotesUtil {
 		if(editNoteDto.getColor()==null) {
 			throw new EditDtoException("Please set a Color");
 		}
+	}
+
+	public static void ValidateDate(DateDto dateDto) throws ParseException {
+		// TODO Auto-generated method stub
+		String date = dateDto.getYear()+"/"+dateDto.getMonth()+"/"+dateDto.getDay();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		sdf.setLenient(false);
+		
+		sdf.parse(date);
+		
 	}
 	
 }

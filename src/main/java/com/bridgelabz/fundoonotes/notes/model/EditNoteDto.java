@@ -1,11 +1,13 @@
 package com.bridgelabz.fundoonotes.notes.model;
 
+import java.util.Date;
+
 public class EditNoteDto {
 
 	private String title;
 	private String body;
 	private String color;
-	private String reminder;
+	private Date reminder;
 	
 	public String getTitle() {
 		return title;
@@ -25,10 +27,10 @@ public class EditNoteDto {
 	public void setColor(String color) {
 		this.color = color;
 	}
-	public String getReminder() {
+	public Date getReminder() {
 		return reminder;
 	}
-	public void setReminder(String reminder) {
+	public void setReminder(Date reminder) {
 		this.reminder = reminder;
 	}
 	

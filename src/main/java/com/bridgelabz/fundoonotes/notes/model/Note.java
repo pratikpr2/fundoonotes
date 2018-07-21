@@ -15,8 +15,9 @@ public class Note {
 	private String body;
 	private Date createdAt;
 	private Date lastModified;
-	private String Reminder;
-	private String color;
+	private Date reminder=null;
+	private String color="white";
+	private boolean isTrashed;
 	
 	public String getUserId() {
 		return userId;
@@ -48,12 +49,7 @@ public class Note {
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
-	public String getReminder() {
-		return Reminder;
-	}
-	public void setReminder(String reminder) {
-		Reminder = reminder;
-	}
+	
 	public String getNoteId() {
 		return noteId;
 	}
@@ -65,6 +61,18 @@ public class Note {
 	}
 	public void setColor(String color) {
 		this.color = color;
+	}
+	public boolean isTrashed() {
+		return isTrashed;
+	}
+	public void setTrashed(boolean isTrashed) {
+		this.isTrashed = isTrashed;
+	}
+	public Date getReminder() {
+		return reminder;
+	}
+	public void setReminder(Date reminder) {
+		this.reminder = reminder;
 	}
 	
 	

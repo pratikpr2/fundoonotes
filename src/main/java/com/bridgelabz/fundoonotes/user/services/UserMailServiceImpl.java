@@ -8,7 +8,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import com.bridgelabz.fundoonotes.user.model.MailDTO;
-import com.bridgelabz.fundoonotes.user.model.User;
 
 @Component
 public class UserMailServiceImpl implements UserMailService {

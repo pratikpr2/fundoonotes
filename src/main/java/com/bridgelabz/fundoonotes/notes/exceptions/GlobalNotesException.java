@@ -49,5 +49,38 @@ public class GlobalNotesException {
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}
+	@ExceptionHandler(UnauthorizedUserException.class)
+	public ResponseEntity<NoteResponseDto> unauthorizedUserException(UnauthorizedUserException exception){
+		logger.error("Error Occured While Authenticating User Notes: "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(2);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
+	@ExceptionHandler(NoteNotTrashedException.class)
+	public ResponseEntity<NoteResponseDto> handleRegistartionException(NoteNotTrashedException exception){
+		logger.error("Error Occured While Trashing Notes: "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-2);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<NoteResponseDto> handleGlobalException(Exception exception){
+		logger.error("Error Occured : "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(3);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
 	
 }
