@@ -1,6 +1,8 @@
 package com.bridgelabz.fundoonotes.notes.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,9 +13,11 @@ public class Note {
 	@Id
 	private String noteId;
 	private String userId;
+	private String lableId;
 	private String title;
 	private String body;
 	private Date createdAt;
+	private List<Label> labelList;
 	private Date lastModified;
 	private Date reminder=null;
 	private String color="white";
@@ -74,7 +78,25 @@ public class Note {
 	public void setReminder(Date reminder) {
 		this.reminder = reminder;
 	}
+	public String getLableId() {
+		return lableId;
+	}
+	public void setLableId(String lableId) {
+		this.lableId = lableId;
+	}
+	public List<Label> getLabelList() {
+		return labelList;
+	}
+	public void setLabelList(List<Label> labelList) {
+		this.labelList = labelList;
+	}
+	@Override
+	public String toString() {
+		return "Note [noteId=" + noteId + ", userId=" + userId + ", lableId=" + lableId + ", title=" + title + ", body="
+				+ body + ", createdAt=" + createdAt + ", labelList=" + labelList + ", lastModified=" + lastModified
+				+ ", reminder=" + reminder + ", color=" + color + ", isTrashed=" + isTrashed + "]";
+	}
 	
-	
+
 	
 }

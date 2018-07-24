@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
 import com.bridgelabz.fundoonotes.notes.exceptions.UnauthorizedUserException;
@@ -36,6 +37,10 @@ public interface NotesService {
 
 	public void unsetReminder(String token, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 
-	
+	public void createLable(String token, String lableName) throws TokenParsingException, LabelException;
+
+	public void addLable(String token, String noteId, String labelId) throws TokenParsingException, NoteNotFoundException, LabelException;
+
+	public void removeLabel(String token, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException;
 	
 }

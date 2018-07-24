@@ -9,17 +9,21 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.SystemPropertyUtils;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
 import com.bridgelabz.fundoonotes.notes.exceptions.UnauthorizedUserException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
+import com.bridgelabz.fundoonotes.notes.model.Label;
 import com.bridgelabz.fundoonotes.notes.model.Note;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
+import com.bridgelabz.fundoonotes.notes.repositories.LabelRepository;
 import com.bridgelabz.fundoonotes.notes.repositories.NotesRepository;
 import com.bridgelabz.fundoonotes.notes.utility.NotesUtil;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
@@ -30,6 +34,9 @@ public class NotesServiceImpl implements NotesService {
 
 	@Autowired 
 	NotesRepository notesrepo;
+	
+	@Autowired
+	LabelRepository labelrepo;
 	
 	@Autowired
 	JwtToken jwt;
@@ -328,5 +335,109 @@ public class NotesServiceImpl implements NotesService {
 		note.get().setReminder(null);
 		
 		notesrepo.save(note.get());
+	}
+	@Override
+	public void createLable(String token, String lableName) throws TokenParsingException, LabelException {
+		jwt.parseJWT(token);
+		if((lableName.trim().length()==0 || lableName.equals(null) || lableName.replaceAll("\"","").trim().length()==0)) {
+			throw new LabelException("No Label Name");
+		}
+		
+		List<Label> lableList = labelrepo.findAllByUserId(jwt.getUserId(token));		
+		
+		for(int i=0;i<lableList.size();i++) {
+			if(lableList.get(i).getLableName().equals(lableName)) {
+				throw new LabelException("Label Already Exists");
+			}
+		}
+		
+		Label label = new Label();
+		label.setUserId(jwt.getUserId(token));
+		label.setLableName(lableName);
+		
+		labelrepo.save(label);
+	}
+
+	@Override
+	public void addLable(String token, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException {
+		// TODO Auto-generated method stub
+		jwt.parseJWT(token);
+		
+		boolean flag = false;
+		
+		Optional<Note> note = notesrepo.findById(noteId);
+		if(!note.isPresent()) {
+			throw new NoteNotFoundException("No Notes found");
+		}
+		
+		List<Label> labelList = new ArrayList<>();
+		labelList = labelrepo.findAllByUserId(jwt.getUserId(token));
+		if(labelList.isEmpty()) {
+			throw new LabelException("No Labels");
+		}
+		
+		List<Label> tempList = new ArrayList<>() ;
+		
+		//System.out.println(note.get().getLabelList().toString());
+		tempList =  note.get().getLabelList();
+		
+		System.out.println(tempList.size());
+		
+		for(int i =0;i<labelList.size();i++) {
+			if(labelList.get(i).getLableName().equals(labelName)) {
+				System.out.println(labelList.get(i).getLableName());
+				Label label = new Label();
+				label.setLableName(labelList.get(i).getLableName());
+				label.setLabelId(labelList.get(i).getLabelId());
+				//label.setNoteId(labelList.get(i).getNoteId());
+				//label.setUserId(labelList.get(i).getUserId());
+				tempList.add(label);
+				flag = true;
+			}
+		}
+		
+		if(!flag) {
+			Label label = new Label();
+			label.setUserId(jwt.getUserId(token));
+			label.setLableName(labelName);
+			labelrepo.save(label);
+		}
+		note.get().setLabelList(tempList);
+		
+		notesrepo.save(note.get());
+	}
+
+	@Override
+	public void removeLabel(String token, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException {
+		// TODO Auto-generated method stub
+		jwt.parseJWT(token);
+		boolean flag= false;
+		Optional<Note> note = notesrepo.findById(noteId);
+		if(!note.isPresent()) {
+			throw new NoteNotFoundException("No Notes found");
+		}
+		
+		
+		List<Label> tempList = new ArrayList<>() ;
+		
+		tempList =  note.get().getLabelList();
+		
+		if(tempList.isEmpty()) {
+			throw new LabelException("No Labels");
+		}
+		
+		for(int i =0;i<tempList.size();i++) {
+			if(tempList.get(i).getLableName().equals(labelName)) {
+				tempList.remove(i);
+				flag=true;
+			}
+		}
+		if(!flag) {
+			throw new LabelException("No Such Labels");
+		}
+		note.get().setLabelList(tempList);
+		
+		notesrepo.save(note.get());
+			
 	}
 }

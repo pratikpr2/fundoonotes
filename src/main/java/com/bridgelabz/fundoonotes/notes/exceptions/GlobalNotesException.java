@@ -71,6 +71,18 @@ public class GlobalNotesException {
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}
+	
+	@ExceptionHandler(LabelException.class)
+	public ResponseEntity<NoteResponseDto> labelcreationException(LabelException exception){
+		logger.error("Error Occured : "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-3);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<NoteResponseDto> handleGlobalException(Exception exception){
 		logger.error("Error Occured : "+ exception.getMessage(),exception);
