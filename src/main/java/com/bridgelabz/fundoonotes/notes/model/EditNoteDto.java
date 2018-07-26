@@ -7,7 +7,7 @@ public class EditNoteDto {
 	private String title;
 	private String body;
 	private String color;
-	private Date reminder;
+	private DateDto reminder;
 	
 	public String getTitle() {
 		return title;
@@ -27,10 +27,10 @@ public class EditNoteDto {
 	public void setColor(String color) {
 		this.color = color;
 	}
-	public Date getReminder() {
+	public DateDto getReminder() {
 		return reminder;
 	}
-	public void setReminder(Date reminder) {
+	public void setReminder(DateDto reminder) {
 		this.reminder = reminder;
 	}
 	

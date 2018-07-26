@@ -23,24 +23,27 @@ public interface NotesService {
 	
 	public List<ViewNoteDto> openAllNotes(String token) throws TokenParsingException, NoteNotFoundException;
 	
-	public void editNote(String token, EditNoteDto editNoteDto, String noteId) throws TokenParsingException, EditDtoException, NoteNotFoundException, UnauthorizedUserException;
+	public void editNote(String userId, EditNoteDto editNoteDto, String noteId) throws TokenParsingException, EditDtoException, NoteNotFoundException, UnauthorizedUserException;
 	
-	void delete(String token, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
+	public void trash(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 	
-	public ViewNoteDto openNote(String token, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 	
-	public void deleteForever(String token, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException;
+	public void deleteForever(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException;
 	
-	public void restore(String token, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException;
-	
-	public void reminder(String token, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, ParseException;
+	public void reminder(String userId, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, ParseException;
 
-	public void unsetReminder(String token, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
+	public void unsetReminder(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 
-	public void createLable(String token, String lableName) throws TokenParsingException, LabelException;
+	public void createLable(String userId, String lableName) throws TokenParsingException, LabelException;
 
-	public void addLable(String token, String noteId, String labelId) throws TokenParsingException, NoteNotFoundException, LabelException;
+	public void addLable(String userId, String noteId, String labelId) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException;
 
-	public void removeLabel(String token, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException;
+	public void removeLabel(String userId, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException;
+
+	public void deleteLable(String userId, String labelId) throws TokenParsingException, LabelException, NoteNotFoundException;
+
+	public void archive(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
+
+	public void pin(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 	
 }

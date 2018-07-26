@@ -23,9 +23,9 @@ public class NotesInterceptor implements HandlerInterceptor {
 	public boolean preHandle(HttpServletRequest request,
 			HttpServletResponse response, Object object) throws Exception {
 		String token = request.getHeader("token");
-		
-		System.out.println(token);
-		if(repo.findByUserEmail(jwt.getUserId(token)).isPresent()) {
+		String userId = jwt.getUserId(token);
+		System.out.println(userId);
+		if(repo.findById(userId).isPresent()) {
 			System.out.println(jwt.getUserId(token));
 			request.setAttribute("token",jwt.getUserId(token));
 			

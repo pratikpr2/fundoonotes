@@ -17,11 +17,13 @@ public class Note {
 	private String title;
 	private String body;
 	private Date createdAt;
-	private List<Label> labelList;
+	private List<Label> labelList = new ArrayList<>();
 	private Date lastModified;
 	private Date reminder=null;
 	private String color="white";
 	private boolean isTrashed;
+	private boolean isArchived;
+	private boolean isPinned;
 	
 	public String getUserId() {
 		return userId;
@@ -95,6 +97,18 @@ public class Note {
 		return "Note [noteId=" + noteId + ", userId=" + userId + ", lableId=" + lableId + ", title=" + title + ", body="
 				+ body + ", createdAt=" + createdAt + ", labelList=" + labelList + ", lastModified=" + lastModified
 				+ ", reminder=" + reminder + ", color=" + color + ", isTrashed=" + isTrashed + "]";
+	}
+	public boolean isArchived() {
+		return isArchived;
+	}
+	public void setArchived(boolean isArchived) {
+		this.isArchived = isArchived;
+	}
+	public boolean isPinned() {
+		return isPinned;
+	}
+	public void setPinned(boolean isPinned) {
+		this.isPinned = isPinned;
 	}
 	
 
