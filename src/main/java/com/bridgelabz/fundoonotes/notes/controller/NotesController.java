@@ -6,7 +6,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +24,7 @@ import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
+import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.notes.services.NotesService;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
@@ -226,9 +226,12 @@ public class NotesController {
 	
 	//-----------------------Pin/UnPin Note----------------------------
 	@RequestMapping(value="/pin",method= RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> pin(@RequestParam(value="token") String token,@RequestParam String noteId,@RequestParam boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
+	public ResponseEntity<NoteResponseDto> pin(HttpServletRequest req,@RequestParam String noteId,@RequestParam boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
-		notesService.pin(token,noteId,condition);
+		
+		String userId = (String)req.getAttribute("token");
+		
+		notesService.pin(userId,noteId,condition);
 		
 		NoteResponseDto response = new NoteResponseDto();
 		if(condition) {
@@ -243,6 +246,26 @@ public class NotesController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 		
 	}	
+	//---------------------View Label--------------------------------
+	@RequestMapping(value="/ViewAllLabels",method= RequestMethod.GET)
+	public ResponseEntity<List<ViewLabelDto>> viewAllLabels(HttpServletRequest req) throws LabelException{
 		
+		String userId = (String)req.getAttribute("token");
 		
+		List<ViewLabelDto> labelList=notesService.viewAllLabels(userId);
+		
+		return new ResponseEntity<>(labelList,HttpStatus.OK);
+		
+	}
+	//-------------------View Labeled Notes-------------------------
+	@RequestMapping(value="/ViewNoteByLabel",method= RequestMethod.GET)
+	public ResponseEntity<List<ViewNoteDto>> viewLabeledNotes(HttpServletRequest req,@RequestParam(value="labelId") String labelId) throws LabelException, NoteNotFoundException{
+		
+		String userId = (String)req.getAttribute("token");
+		
+		List<ViewNoteDto> viewNoteList = notesService.viewLabeledNotes(userId,labelId);
+		
+		return new ResponseEntity<>(viewNoteList,HttpStatus.OK);
+	}
+	
 }

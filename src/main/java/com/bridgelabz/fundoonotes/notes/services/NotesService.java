@@ -12,6 +12,7 @@ import com.bridgelabz.fundoonotes.notes.exceptions.UnauthorizedUserException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
+import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 
@@ -45,5 +46,9 @@ public interface NotesService {
 	public void archive(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 
 	public void pin(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
+
+	public List<ViewLabelDto> viewAllLabels(String userId) throws LabelException;
+
+	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException;
 	
 }

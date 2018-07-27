@@ -1,7 +1,5 @@
 package com.bridgelabz.fundoonotes.notes.model;
 
-import java.util.Date;
-
 public class EditNoteDto {
 
 	private String title;

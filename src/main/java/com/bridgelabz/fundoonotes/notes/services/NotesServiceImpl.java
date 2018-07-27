@@ -20,6 +20,7 @@ import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.Label;
 import com.bridgelabz.fundoonotes.notes.model.Note;
+import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.notes.repositories.LabelRepository;
 import com.bridgelabz.fundoonotes.notes.repositories.NotesRepository;
@@ -62,6 +63,12 @@ public class NotesServiceImpl implements NotesService {
 		note.setLastModified(NotesUtil.generateDate());
 		if(!(createDto.getColor().length()==0 || createDto.getColor().trim().length()==0))
 			note.setColor(createDto.getColor());
+		
+		List<Label> labelList = new ArrayList<>();
+		if(!createDto.getLabel().isEmpty()) {
+			
+			
+		}
 		notesrepo.save(note);
 		
 		ViewNoteDto viewNote = new ViewNoteDto();
@@ -460,5 +467,68 @@ public class NotesServiceImpl implements NotesService {
 		}
 		
 		notesrepo.save(note.get());
+	}
+
+	@Override
+	public List<ViewLabelDto> viewAllLabels(String userId) throws LabelException {
+		// TODO Auto-generated method stub
+		List<Label> labelList = labelrepo.findAllByUserId(userId);
+		List<ViewLabelDto> viewLabelList = new ArrayList<>();
+		
+		
+		if(labelList.isEmpty()) {
+			throw new LabelException("No Labels");
+		}
+		for(int i=0;i<labelList.size();i++) {
+			ViewLabelDto viewLabel = new ViewLabelDto();
+			viewLabel.setLabelId(labelList.get(i).getLabelId());
+			viewLabel.setLabelName(labelList.get(i).getLableName());
+			
+			viewLabelList.add(viewLabel);
+		}
+		
+		return viewLabelList;
+	}
+
+	@Override
+	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException {
+		// TODO Auto-generated method stub
+		
+		Optional<Label> label = labelrepo.findById(labelId);
+		List<Note> noteList = notesrepo.findAllByUserId(userId);
+		
+		if(!label.isPresent()) {
+			throw new LabelException("No Labels");
+		}
+		
+		if(noteList.isEmpty()) {
+			throw new NoteNotFoundException("No Notes");
+		}
+		
+		List<ViewNoteDto> viewnoteList = new ArrayList<>();
+		
+		for(int i=0;i<noteList.size();i++) {
+			List<Label> labelList = noteList.get(i).getLabelList();
+			if(!labelList.isEmpty()) {
+				for(int j=0;j<labelList.size();j++) {
+					if(labelList.get(j).getLabelId().equals(labelId)) {
+						ViewNoteDto viewNote = new ViewNoteDto();
+						viewNote.setTitle(noteList.get(i).getTitle());
+						viewNote.setBody(noteList.get(i).getBody());
+						viewNote.setCreatedAt(noteList.get(i).getCreatedAt());
+						viewNote.setLastModified(noteList.get(i).getLastModified());
+						viewNote.setReminder(noteList.get(i).getReminder());
+						
+						viewnoteList.add(viewNote);
+					}
+				}
+			}
+		}
+		if(viewnoteList.isEmpty()) {
+			throw new LabelException("No Labels");
+		}
+		
+		return viewnoteList;
+		
 	}
 }

@@ -13,7 +13,6 @@ public class Note {
 	@Id
 	private String noteId;
 	private String userId;
-	private String lableId;
 	private String title;
 	private String body;
 	private Date createdAt;
@@ -80,12 +79,8 @@ public class Note {
 	public void setReminder(Date reminder) {
 		this.reminder = reminder;
 	}
-	public String getLableId() {
-		return lableId;
-	}
-	public void setLableId(String lableId) {
-		this.lableId = lableId;
-	}
+	
+	
 	public List<Label> getLabelList() {
 		return labelList;
 	}
@@ -94,7 +89,7 @@ public class Note {
 	}
 	@Override
 	public String toString() {
-		return "Note [noteId=" + noteId + ", userId=" + userId + ", lableId=" + lableId + ", title=" + title + ", body="
+		return "Note [noteId=" + noteId + ", userId=" + userId + ", title=" + title + ", body="
 				+ body + ", createdAt=" + createdAt + ", labelList=" + labelList + ", lastModified=" + lastModified
 				+ ", reminder=" + reminder + ", color=" + color + ", isTrashed=" + isTrashed + "]";
 	}
