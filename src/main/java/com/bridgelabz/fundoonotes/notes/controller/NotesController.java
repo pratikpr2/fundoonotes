@@ -1,6 +1,5 @@
 package com.bridgelabz.fundoonotes.notes.controller;
 
-import java.text.ParseException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
@@ -39,11 +39,11 @@ public class NotesController {
 	//------------------Create Note---------------------------
 	
 	@RequestMapping(value="/create",method= RequestMethod.POST)
-	public ResponseEntity<ViewNoteDto > createNote(HttpServletRequest req,@RequestBody CreateDTO createDto) throws CreateDtoException, TokenParsingException, NoteNotFoundException{
+	public ResponseEntity<ViewNoteDto > createNote(HttpServletRequest req,@RequestBody CreateDTO createDto,@RequestParam(value="isPinned")boolean isPinned,@RequestParam(value="isArchived")boolean isArchived) throws CreateDtoException, TokenParsingException, InvalidDateFormatException, LabelException {
 		
 		String userId = (String)req.getAttribute("token");
 		
-		ViewNoteDto view = notesService.create(createDto,userId);
+		ViewNoteDto view = notesService.create(createDto, userId, isPinned, isArchived);
 	
 		return new ResponseEntity<>(view,HttpStatus.OK);
 		
@@ -114,7 +114,7 @@ public class NotesController {
 	}
 	//-------------------Set Reminder------------------------------
 	@RequestMapping(value="/addreminder",method=RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> setReminder(HttpServletRequest req, @RequestParam(value="noteId") String noteId,@RequestBody DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, ParseException{
+	public ResponseEntity<NoteResponseDto> setReminder(HttpServletRequest req, @RequestParam(value="noteId") String noteId,@RequestBody DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, InvalidDateFormatException{
 		
 		String userId = (String)req.getAttribute("token");
 		
@@ -159,6 +159,17 @@ public class NotesController {
 	}
 	
 	//----------------------Add Labels---------------------------
+	/**
+	 * 
+	 * @param req
+	 * @param noteId
+	 * @param labelName
+	 * @return
+	 * @throws TokenParsingException
+	 * @throws NoteNotFoundException
+	 * @throws LabelException
+	 * @throws UnauthorizedUserException
+	 */
 	@RequestMapping(value="/addlabel",method=RequestMethod.POST)
 	public ResponseEntity<NoteResponseDto> addLabel(HttpServletRequest req, @RequestParam(value="noteId") String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
 		

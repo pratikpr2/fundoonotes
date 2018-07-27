@@ -8,7 +8,6 @@ public class Label {
 
 	@Id
 	private String labelId;
-	private String noteId;
 	private String userId;
 	private String lableName;
 	
@@ -19,12 +18,7 @@ public class Label {
 	public void setLabelId(String labelId) {
 		this.labelId = labelId;
 	}
-	public String getNoteId() {
-		return noteId;
-	}
-	public void setNoteId(String noteId) {
-		this.noteId = noteId;
-	}
+	
 	public String getUserId() {
 		return userId;
 	}

@@ -1,6 +1,5 @@
 package com.bridgelabz.fundoonotes.notes.services;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
@@ -48,13 +48,16 @@ public class NotesServiceImpl implements NotesService {
 	 * @return ViewNoteDto
 	 * @throws CreateDtoException
 	 * @throws TokenParsingException
+	 * @throws InvalidDateFormatException  
+	 * @throws LabelException 
 	 */
 	@Override
-	public ViewNoteDto create(CreateDTO createDto,String userId) throws CreateDtoException, TokenParsingException {
+	public ViewNoteDto create(CreateDTO createDto,String userId,boolean isPinned,boolean isArchived) throws CreateDtoException, TokenParsingException, InvalidDateFormatException, LabelException{
 		// TODO Auto-generated method stub
-		
 		NotesUtil.ValidateCreateDto(createDto);
 		
+		boolean flag = NotesUtil.isReminderDefault(createDto.getReminder());
+		boolean flag2 = false ;
 		Note note = new Note();
 		note.setUserId(userId);
 		note.setTitle(createDto.getTitle());
@@ -65,10 +68,84 @@ public class NotesServiceImpl implements NotesService {
 			note.setColor(createDto.getColor());
 		
 		List<Label> labelList = new ArrayList<>();
+		labelList = labelrepo.findAllByUserId(userId);
+		
+		List<ViewLabelDto> viewLableList = new ArrayList<>();
+		
 		if(!createDto.getLabel().isEmpty()) {
-			
-			
+			for(int i=0;i<createDto.getLabel().size();i++) {
+				String lableName = createDto.getLabel().get(i);
+				if(!(lableName.trim().length()==0)) {
+					
+					if(!labelList.isEmpty()) {
+						for(int j=0;j<labelList.size();j++) {
+							if(labelList.get(j).getLableName().equals(lableName)) {
+								
+								ViewLabelDto viewLable = new ViewLabelDto();
+								viewLable.setLabelId(labelList.get(j).getLabelId());
+								viewLable.setLabelName(labelList.get(j).getLableName());
+								
+								viewLableList.add(viewLable);
+								
+								flag2 = true;
+								
+							}
+						}
+						if(!flag2) {
+							Label label = new Label();
+							
+							ViewLabelDto viewLable = new ViewLabelDto();
+							
+							label.setLableName(lableName);
+							label.setUserId(userId);
+							
+							labelrepo.save(label);
+							
+							viewLable.setLabelId(label.getLabelId());
+							viewLable.setLabelName(label.getLableName());
+							
+							viewLableList.add(viewLable);
+						}
+					}
+					else {
+						Label label = new Label();
+						ViewLabelDto viewLable = new ViewLabelDto();
+						
+						label.setLableName(lableName);
+						label.setUserId(userId);
+						
+						labelrepo.save(label);
+						
+						viewLable.setLabelId(label.getLabelId());
+						viewLable.setLabelName(label.getLableName());
+						
+						viewLableList.add(viewLable);
+					}
+				}
+			}
+				
+		}		
+		note.setLabelList(viewLableList);
+		
+		if(isPinned) {
+			note.setPinned(true);
 		}
+		if(isArchived) {
+			note.setArchived(true);
+		}
+		
+		if(!flag) {
+		DateTime date = DateTime.parse(createDto.getReminder().getDay()+"/"+createDto.getReminder().getMonth()+"/"+createDto.getReminder().getYear()+" "+createDto.getReminder().getHours()+":"+createDto.getReminder().getMinutes()+":"+createDto.getReminder().getSeconds(),
+				DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"));
+		
+		
+		
+		note.setReminder(date.toDate());
+		}
+		else {
+			note.setReminder(null);
+		}
+		
 		notesrepo.save(note);
 		
 		ViewNoteDto viewNote = new ViewNoteDto();
@@ -78,8 +155,11 @@ public class NotesServiceImpl implements NotesService {
 		viewNote.setCreatedAt(note.getCreatedAt());
 		viewNote.setLastModified(note.getLastModified());
 		viewNote.setReminder(note.getReminder());
+		viewNote.setColor(note.getColor());
+		viewNote.setLabelList(note.getLabelList());
 		
 		return viewNote;
+		
 	}
 	
 	/**
@@ -235,10 +315,10 @@ public class NotesServiceImpl implements NotesService {
 	 * @throws UnauthorizedUserException
 	 * @throws NoteNotFoundException
 	 * @throws TokenParsingException
-	 * @throws ParseException
+	 * @throws InvalidDateFormatException 
 	 */
 	@Override
-	public void reminder(String userId, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, ParseException {
+	public void reminder(String userId, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException,InvalidDateFormatException {
 		// TODO Auto-generated method stub
 		//jwt.parseJWT(token);
 		
@@ -290,6 +370,15 @@ public class NotesServiceImpl implements NotesService {
 		
 		notesrepo.save(note.get());
 	}
+	
+	/**
+	 * To Create Label
+	 * 
+	 * @param userId
+	 * @param lableName
+	 * @throws LabelException
+	 * @throws TokenParsingException
+	 */
 	@Override
 	public void createLable(String userId, String lableName) throws TokenParsingException, LabelException {
 		//jwt.parseJWT(token);
@@ -311,7 +400,17 @@ public class NotesServiceImpl implements NotesService {
 		
 		labelrepo.save(label);
 	}
-
+	/**
+	 * To Add Label
+	 * 
+	 * @param userId
+	 * @param lableName
+	 * @param noteId
+	 * @throws LabelException
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 * @throws TokenParsingException
+	 */
 	@Override
 	public void addLable(String userId, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException {
 		// TODO Auto-generated method stub
@@ -326,22 +425,34 @@ public class NotesServiceImpl implements NotesService {
 		if(!note.get().getUserId().equals(userId)) {
 			throw new UnauthorizedUserException("UnAuthorized User");
 		}
+		
 		List<Label> labelList = new ArrayList<>();
 		labelList = labelrepo.findAllByUserId(userId);
+		System.out.println(labelList.size());
+		
 		if(labelList.isEmpty()) {
 			throw new LabelException("No Labels");
 		}
-		List<Label> tempList = note.get().getLabelList();
-		//System.out.println(note.get().getLabelList().toString());
+		
+		List<ViewLabelDto> tempList = note.get().getLabelList();
+		System.out.println(tempList.size());
+		
 		for(int i =0;i<labelList.size();i++) {
 			if(labelList.get(i).getLableName().equals(labelName)) {
-				//System.out.println(labelList.get(i).getLableName());
-				Label label = new Label();
-				label.setLableName(labelList.get(i).getLableName());
-				label.setLabelId(labelList.get(i).getLabelId());
-				tempList.add(label);
-				flag = true;
+				for(int j =0;j<tempList.size();j++) {
+				
+					if(tempList.get(j).getLabelName().equals(labelName)) {
+						throw new LabelException("Label Already added");
+					}
+					
+					ViewLabelDto label = new ViewLabelDto();
+					label.setLabelName(labelList.get(i).getLableName());
+					label.setLabelId(labelList.get(i).getLabelId());
+					tempList.add(label);
+					flag = true;
+				}
 			}
+			
 		}
 		
 		if(!flag) {
@@ -349,12 +460,27 @@ public class NotesServiceImpl implements NotesService {
 			label.setUserId(userId);
 			label.setLableName(labelName);
 			labelrepo.save(label);
+			
+			ViewLabelDto viewLabel = new ViewLabelDto();
+			viewLabel.setLabelName(label.getLableName());
+			viewLabel.setLabelId(label.getLabelId());
+			tempList.add(viewLabel);
 		}
 		note.get().setLabelList(tempList);
 		
 		notesrepo.save(note.get());
 	}
-
+	/**
+	 * To Remove Label
+	 * 
+	 * @param userId
+	 * @param noteId
+	 * @param lableName
+	 * @throws LabelException
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 * @throws TokenParsingException
+	 */
 	@Override
 	public void removeLabel(String userId, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException {
 		// TODO Auto-generated method stub
@@ -368,7 +494,7 @@ public class NotesServiceImpl implements NotesService {
 		if(!note.get().getUserId().equals(userId)) {
 			throw new UnauthorizedUserException("UnAuthorized User");
 		}
-		List<Label> tempList = new ArrayList<>() ;
+		List<ViewLabelDto> tempList = new ArrayList<>() ;
 		
 		tempList =  note.get().getLabelList();
 		
@@ -377,7 +503,7 @@ public class NotesServiceImpl implements NotesService {
 		}
 		
 		for(int i =0;i<tempList.size();i++) {
-			if(tempList.get(i).getLableName().equals(labelName)) {
+			if(tempList.get(i).getLabelName().equals(labelName)) {
 				tempList.remove(i);
 				flag=true;
 			}
@@ -390,7 +516,15 @@ public class NotesServiceImpl implements NotesService {
 		notesrepo.save(note.get());
 			
 	}
-
+	/**
+	 * To Delete Label
+	 * 
+	 * @param userId
+	 * @param labelId
+	 * @throws LabelException
+	 * @throws NoteNotFoundException
+	 * @throws TokenParsingException
+	 */
 	@Override
 	public void deleteLable(String userId, String labelId) throws TokenParsingException, LabelException, NoteNotFoundException {
 		// TODO Auto-generated method stub
@@ -407,7 +541,7 @@ public class NotesServiceImpl implements NotesService {
 		}
 		
 		for(int i=0;i<noteList.size();i++) {
-			List<Label> labelList = noteList.get(i).getLabelList();
+			List<ViewLabelDto> labelList = noteList.get(i).getLabelList();
 			if(!labelList.isEmpty()) {
 				for(int j=0;j<labelList.size();j++) {
 					if(labelList.get(j).getLabelId().equals(labelId)) {
@@ -423,7 +557,16 @@ public class NotesServiceImpl implements NotesService {
 		labelrepo.deleteById(labelId);
 		
 	}
-
+	/**
+	 * To Archive/Unarchive
+	 * 
+	 * @param userId
+	 * @param noteId
+	 * @param condition
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 * @throws TokenParsingException
+	 */
 	@Override
 	public void archive(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException {
 		// TODO Auto-generated method stub
@@ -445,7 +588,16 @@ public class NotesServiceImpl implements NotesService {
 		}
 		notesrepo.save(note.get());
 	}
-
+	/**
+	 * To Pin/UnPin
+	 * 
+	 * @param userId
+	 * @param noteId
+	 * @param condition
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 * @throws TokenParsingException
+	 */
 	@Override
 	public void pin(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException {
 		// TODO Auto-generated method stub
@@ -468,7 +620,12 @@ public class NotesServiceImpl implements NotesService {
 		
 		notesrepo.save(note.get());
 	}
-
+	/**
+	 * To View All Labels
+	 * 
+	 * @param userId
+	 * @throws LabelException
+	 */
 	@Override
 	public List<ViewLabelDto> viewAllLabels(String userId) throws LabelException {
 		// TODO Auto-generated method stub
@@ -489,7 +646,14 @@ public class NotesServiceImpl implements NotesService {
 		
 		return viewLabelList;
 	}
-
+	/**
+	 * To View All Labeled Notes
+	 * 
+	 * @param userId
+	 * @param labelId
+	 * @throws LabelException
+	 * @throws NoteNotFoundException
+	 */
 	@Override
 	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException {
 		// TODO Auto-generated method stub
@@ -508,7 +672,7 @@ public class NotesServiceImpl implements NotesService {
 		List<ViewNoteDto> viewnoteList = new ArrayList<>();
 		
 		for(int i=0;i<noteList.size();i++) {
-			List<Label> labelList = noteList.get(i).getLabelList();
+			List<ViewLabelDto> labelList = noteList.get(i).getLabelList();
 			if(!labelList.isEmpty()) {
 				for(int j=0;j<labelList.size();j++) {
 					if(labelList.get(j).getLabelId().equals(labelId)) {

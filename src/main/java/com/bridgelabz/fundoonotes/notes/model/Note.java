@@ -16,7 +16,7 @@ public class Note {
 	private String title;
 	private String body;
 	private Date createdAt;
-	private List<Label> labelList = new ArrayList<>();
+	private List<ViewLabelDto> labelList = new ArrayList<>();
 	private Date lastModified;
 	private Date reminder=null;
 	private String color="white";
@@ -81,10 +81,10 @@ public class Note {
 	}
 	
 	
-	public List<Label> getLabelList() {
+	public List<ViewLabelDto> getLabelList() {
 		return labelList;
 	}
-	public void setLabelList(List<Label> labelList) {
+	public void setLabelList(List<ViewLabelDto> labelList) {
 		this.labelList = labelList;
 	}
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
@@ -18,7 +19,7 @@ import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 
 public interface NotesService {
 
-	public ViewNoteDto create(CreateDTO createDto, String userId) throws CreateDtoException, TokenParsingException;
+	public ViewNoteDto create(CreateDTO createDto, String userId, boolean isPinned, boolean isArchived) throws CreateDtoException, TokenParsingException, InvalidDateFormatException, LabelException;
 	
 	//public ViewNoteDto open(String userId) throws TokenParsingException, NoteNotFoundException;
 	
@@ -31,7 +32,7 @@ public interface NotesService {
 	
 	public void deleteForever(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException;
 	
-	public void reminder(String userId, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, ParseException;
+	public void reminder(String userId, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, InvalidDateFormatException;
 
 	public void unsetReminder(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 

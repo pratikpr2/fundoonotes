@@ -6,6 +6,7 @@ import java.util.Date;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
+import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
@@ -45,14 +46,28 @@ public class NotesUtil {
 		}
 	}
 
-	public static void ValidateDate(DateDto dateDto) throws ParseException {
+	public static void ValidateDate(DateDto dateDto) throws InvalidDateFormatException{
 		// TODO Auto-generated method stub
 		String date = dateDto.getYear()+"/"+dateDto.getMonth()+"/"+dateDto.getDay();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		sdf.setLenient(false);
-		
-		sdf.parse(date);
+		try {
+			sdf.parse(date);
+		}
+		catch(Exception e) {
+			throw new InvalidDateFormatException("Invalid date Format");
+		}
 		
 	}
-	
+
+	public static boolean isReminderDefault(DateDto reminder) {
+		// TODO Auto-generated method stub
+		if(reminder.getDay().equals("string") && reminder.getHours().equals("string")
+			&& reminder.getMinutes().equals("string") && reminder.getMonth().equals("string")	
+			&& reminder.getSeconds().equals("string") && reminder.getYear().equals("string")) {
+			return true;
+		}
+		return false;
+	}
+
 }
