@@ -1,6 +1,5 @@
 package com.bridgelabz.fundoonotes.notes.services;
 
-import java.text.ParseException;
 import java.util.List;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
@@ -21,14 +20,11 @@ public interface NotesService {
 
 	public ViewNoteDto create(CreateDTO createDto, String userId, boolean isPinned, boolean isArchived) throws CreateDtoException, TokenParsingException, InvalidDateFormatException, LabelException;
 	
-	//public ViewNoteDto open(String userId) throws TokenParsingException, NoteNotFoundException;
-	
 	public List<ViewNoteDto> openAllNotes(String token) throws TokenParsingException, NoteNotFoundException;
 	
 	public void editNote(String userId, EditNoteDto editNoteDto, String noteId) throws TokenParsingException, EditDtoException, NoteNotFoundException, UnauthorizedUserException;
 	
 	public void trash(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
-	
 	
 	public void deleteForever(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException;
 	
@@ -51,5 +47,13 @@ public interface NotesService {
 	public List<ViewLabelDto> viewAllLabels(String userId) throws LabelException;
 
 	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException;
+
+	public void addColor(String userId, String color, String noteId) throws NoteNotFoundException, UnauthorizedUserException;
+
+	public void removeColor(String userId, String noteId) throws NoteNotFoundException, UnauthorizedUserException;
+
+	public List<ViewNoteDto> viewPinnedNotes(String userId) throws NoteNotFoundException;
+
+	public List<ViewNoteDto> viewArchivedNotes(String userId) throws NoteNotFoundException;
 	
 }

@@ -58,12 +58,15 @@ public class NotesServiceImpl implements NotesService {
 		
 		boolean flag = NotesUtil.isReminderDefault(createDto.getReminder());
 		boolean flag2 = false ;
+		
 		Note note = new Note();
+		
 		note.setUserId(userId);
 		note.setTitle(createDto.getTitle());
 		note.setBody(createDto.getBody());
 		note.setCreatedAt(NotesUtil.generateDate());
 		note.setLastModified(NotesUtil.generateDate());
+		
 		if(!(createDto.getColor().length()==0 || createDto.getColor().trim().length()==0))
 			note.setColor(createDto.getColor());
 		
@@ -381,7 +384,7 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void createLable(String userId, String lableName) throws TokenParsingException, LabelException {
-		//jwt.parseJWT(token);
+		
 		if((lableName.trim().length()==0 || lableName.equals(null) || lableName.replaceAll("\"","").trim().length()==0)) {
 			throw new LabelException("No Label Name");
 		}
@@ -694,5 +697,138 @@ public class NotesServiceImpl implements NotesService {
 		
 		return viewnoteList;
 		
+	}
+	/**
+	 * To Add Color To A Note
+	 * 
+	 * @param userId
+	 * @param color
+	 * @param noteId
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 */
+	@Override
+	public void addColor(String userId, String color,String noteId) throws NoteNotFoundException, UnauthorizedUserException {
+		// TODO Auto-generated method stub
+		Optional<Note> note = notesrepo.findById(noteId);
+		
+		if(!note.isPresent()) {
+			throw new NoteNotFoundException("No Notes");
+		}
+		if(!note.get().getUserId().equals(userId)) {
+			throw new UnauthorizedUserException("Unauthorized user");
+		}
+		
+		note.get().setColor(color);
+		
+		notesrepo.save(note.get());
+		
+	}
+	/**
+	 * To Remove Color From A Note
+	 * 
+	 * @param userId
+	 * @param noteId
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 */
+	@Override
+	public void removeColor(String userId, String noteId) throws NoteNotFoundException, UnauthorizedUserException {
+		// TODO Auto-generated method stub
+		Optional<Note> note = notesrepo.findById(noteId);
+		
+		if(!note.isPresent()) {
+			throw new NoteNotFoundException("No Notes");
+		}
+		if(!note.get().getUserId().equals(userId)) {
+			throw new UnauthorizedUserException("Unauthorized user");
+		}
+		note.get().setColor("white");
+		
+		notesrepo.save(note.get());
+	}
+	/**
+	 * To View Pinned Notes
+	 * 
+	 * @param userId
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 */
+	@Override
+	public List<ViewNoteDto> viewPinnedNotes(String userId) throws NoteNotFoundException {
+		// TODO Auto-generated method stub
+		List<Note> noteList = notesrepo.findAllByUserId(userId);
+		
+		if(!noteList.isEmpty()) {
+			throw new NoteNotFoundException("No Notes");
+		}
+		
+		
+		List<ViewNoteDto> viewnoteList = new ArrayList<>();
+		List<ViewNoteDto> viewnoteListUnpinned = new ArrayList<>();
+		for(int i=0;i<noteList.size();i++) {
+			if(noteList.get(i).isPinned()==true) {
+				ViewNoteDto viewNote = new ViewNoteDto();
+				viewNote.setTitle(noteList.get(i).getTitle());
+				viewNote.setBody(noteList.get(i).getBody());
+				viewNote.setCreatedAt(noteList.get(i).getCreatedAt());
+				viewNote.setLastModified(noteList.get(i).getLastModified());
+				viewNote.setReminder(noteList.get(i).getReminder());
+				viewNote.setLabelList(noteList.get(i).getLabelList());
+				viewNote.setColor(noteList.get(i).getColor());
+				
+				viewnoteList.add(viewNote);
+			}
+			else {
+				ViewNoteDto viewNote = new ViewNoteDto();
+				viewNote.setTitle(noteList.get(i).getTitle());
+				viewNote.setBody(noteList.get(i).getBody());
+				viewNote.setCreatedAt(noteList.get(i).getCreatedAt());
+				viewNote.setLastModified(noteList.get(i).getLastModified());
+				viewNote.setReminder(noteList.get(i).getReminder());
+				viewNote.setLabelList(noteList.get(i).getLabelList());
+				viewNote.setColor(noteList.get(i).getColor());
+				
+				viewnoteListUnpinned.add(viewNote);
+			}
+		}
+		
+		viewnoteList.addAll(viewnoteListUnpinned);
+		
+		return viewnoteList;
+	}
+	/**
+	 * To View Archived Notes
+	 * 
+	 * @param userId
+	 * @throws UnauthorizedUserException
+	 * @throws NoteNotFoundException
+	 */
+	@Override
+	public List<ViewNoteDto> viewArchivedNotes(String userId) throws NoteNotFoundException {
+		// TODO Auto-generated method stub
+		List<Note> noteList = notesrepo.findAllByUserId(userId);
+		
+		if(!noteList.isEmpty()) {
+			throw new NoteNotFoundException("No Notes");
+		}
+		
+		List<ViewNoteDto> viewnoteList = new ArrayList<>();
+		
+		for(int i=0;i<noteList.size();i++) {
+			if(noteList.get(i).isArchived()==true) {
+				ViewNoteDto viewNote = new ViewNoteDto();
+				viewNote.setTitle(noteList.get(i).getTitle());
+				viewNote.setBody(noteList.get(i).getBody());
+				viewNote.setCreatedAt(noteList.get(i).getCreatedAt());
+				viewNote.setLastModified(noteList.get(i).getLastModified());
+				viewNote.setReminder(noteList.get(i).getReminder());
+				viewNote.setLabelList(noteList.get(i).getLabelList());
+				viewNote.setColor(noteList.get(i).getColor());
+				
+				viewnoteList.add(viewNote);
+			}
+		}
+		return viewnoteList;
 	}
 }
