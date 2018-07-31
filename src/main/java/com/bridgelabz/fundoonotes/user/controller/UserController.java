@@ -2,6 +2,7 @@ package com.bridgelabz.fundoonotes.user.controller;
 
 import javax.mail.MessagingException;
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,11 +33,12 @@ public class UserController {
 	// -------------------Login--------------------------
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public ResponseEntity<ResponseDto> login(@RequestBody LoginDTO checkUser) throws LoginException {
+	public ResponseEntity<ResponseDto> login(@RequestBody LoginDTO checkUser,HttpServletResponse res) throws LoginException {
 
 		// System.out.println("Inside Login");
+		
 		userService.login(checkUser);
-
+		
 		ResponseDto response = new ResponseDto();
 		response.setMessage("SuccessFully LoggedIn");
 		response.setStatus(1);

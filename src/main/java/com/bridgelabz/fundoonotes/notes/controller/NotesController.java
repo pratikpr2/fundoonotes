@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,11 +31,11 @@ import com.bridgelabz.fundoonotes.notes.services.NotesService;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 
 @RestController
-@RequestMapping("/notes")
+@RequestMapping("/api/notes")
 public class NotesController {
 
 	@Autowired
-	NotesService notesService;
+	private NotesService notesService;
 	
 	//------------------Create Note---------------------------
 	/**
@@ -52,7 +53,7 @@ public class NotesController {
 	@RequestMapping(value="/create",method= RequestMethod.POST)
 	public ResponseEntity<ViewNoteDto > createNote(HttpServletRequest req,@RequestBody CreateDTO createDto,@RequestParam(value="isPinned")boolean isPinned,@RequestParam(value="isArchived")boolean isArchived) throws CreateDtoException, TokenParsingException, InvalidDateFormatException, LabelException {
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		ViewNoteDto view = notesService.create(createDto, userId, isPinned, isArchived);
 	
@@ -68,10 +69,10 @@ public class NotesController {
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 */
-	@RequestMapping(value="/openAll",method = RequestMethod.POST)
+	@RequestMapping(value="/openAll",method = RequestMethod.GET)
 	public ResponseEntity<List<ViewNoteDto>> openNotes(HttpServletRequest req) throws TokenParsingException, NoteNotFoundException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 
 		List<ViewNoteDto> notes = notesService.openAllNotes(userId);
 		
@@ -90,10 +91,10 @@ public class NotesController {
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/edit",method = RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> editNotes(HttpServletRequest req,@RequestParam(value="noteId") String noteId ,@RequestBody EditNoteDto editNoteDto) throws TokenParsingException, EditDtoException, NoteNotFoundException, UnauthorizedUserException {
+	@RequestMapping(value="/edit/{noteId}",method = RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> editNotes(HttpServletRequest req,@PathVariable String noteId ,@RequestBody EditNoteDto editNoteDto) throws TokenParsingException, EditDtoException, NoteNotFoundException, UnauthorizedUserException {
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.editNote(userId,editNoteDto,noteId);
 		
@@ -116,10 +117,10 @@ public class NotesController {
 	 * @throws UnauthorizedUserException
 	 */
 	
-	@RequestMapping(value="/trash",method = RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> deleteNote(HttpServletRequest req,@RequestParam(value="noteId") String noteId,@RequestParam(value="condition") boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
+	@RequestMapping(value="/trash/{noteId}",method = RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> deleteNote(HttpServletRequest req,@PathVariable String noteId,@RequestParam(value="condition") boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.trash(userId,noteId,condition);
 		
@@ -148,10 +149,10 @@ public class NotesController {
 	 * @throws NoteNotTrashedException
 	 */
 	
-	@RequestMapping(value="/deleteforever",method=RequestMethod.DELETE)
-	public ResponseEntity<NoteResponseDto> deleteForever(HttpServletRequest req,@RequestParam(value="noteId") String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException{
+	@RequestMapping(value="/deleteforever/{noteId}",method=RequestMethod.DELETE)
+	public ResponseEntity<NoteResponseDto> deleteForever(HttpServletRequest req,@PathVariable String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.deleteForever(userId,noteId);
 		
@@ -176,9 +177,9 @@ public class NotesController {
 	@RequestMapping(value="/addreminder",method=RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> setReminder(HttpServletRequest req, @RequestParam(value="noteId") String noteId,@RequestBody DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, InvalidDateFormatException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
-		notesService.reminder(userId,noteId,dateDto);
+		notesService.reminder(userId, noteId, dateDto);
 		
 		NoteResponseDto response = new NoteResponseDto();
 		response.setMessage("Reminder Added");
@@ -200,7 +201,7 @@ public class NotesController {
 	@RequestMapping(value="/removereminder",method=RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> removeReminder(HttpServletRequest req, @RequestParam(value="noteId") String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.unsetReminder(userId,noteId);
 		
@@ -211,29 +212,7 @@ public class NotesController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
-	//---------------------Create Label---------------------------
-	/**
-	 * 
-	 * @param req
-	 * @param labelName
-	 * @return
-	 * @throws TokenParsingException
-	 * @throws LabelException
-	 */
 	
-	@RequestMapping(value="/createlabel",method=RequestMethod.POST)
-	public ResponseEntity<NoteResponseDto> createLabel(HttpServletRequest req,@RequestBody String labelName) throws TokenParsingException, LabelException{
-		
-		String userId = (String)req.getAttribute("token");
-		
-		notesService.createLable(userId, labelName);
-		
-		NoteResponseDto response = new NoteResponseDto();
-		response.setMessage("Label Created");
-		response.setStatus(1);
-
-		return new ResponseEntity<>(response,HttpStatus.OK);
-	}
 	
 	//----------------------Add Labels---------------------------
 	/**
@@ -250,7 +229,7 @@ public class NotesController {
 	@RequestMapping(value="/addlabel",method=RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> addLabel(HttpServletRequest req, @RequestParam(value="noteId") String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.addLable(userId,noteId,labelName);
 		
@@ -276,7 +255,7 @@ public class NotesController {
 	@RequestMapping(value="/removelabel",method=RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> removeLabel(HttpServletRequest req, @RequestParam(value="noteId") String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.removeLabel(userId,noteId,labelName);
 		
@@ -287,29 +266,7 @@ public class NotesController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
-	//-----------------------Edit Label----------------------------
-	/**
-	 * 
-	 * @param req
-	 * @param labelId
-	 * @return
-	 * @throws TokenParsingException
-	 * @throws LabelException
-	 * @throws NoteNotFoundException
-	 */
-	@RequestMapping(value="/deletelabel",method= RequestMethod.DELETE)
-	public ResponseEntity<NoteResponseDto> editLable(HttpServletRequest req, @RequestParam(value="labelId") String labelId) throws TokenParsingException, LabelException, NoteNotFoundException{
-		
-		String userId = (String)req.getAttribute("token");
-		
-		notesService.deleteLable(userId,labelId);
-		
-		NoteResponseDto response = new NoteResponseDto();
-		response.setMessage("Label Deleted");
-		response.setStatus(1);
-		
-		return new ResponseEntity<>(response,HttpStatus.OK);
-	}
+
 	
 	//-----------------------Archive/UnArchive Note----------------------------
 	/**
@@ -325,7 +282,7 @@ public class NotesController {
 	@RequestMapping(value="/archive",method= RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> archive(HttpServletRequest req,@RequestParam String noteId,@RequestParam boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 			
 		notesService.archive(userId,noteId,condition);
 		
@@ -358,7 +315,7 @@ public class NotesController {
 	public ResponseEntity<NoteResponseDto> pin(HttpServletRequest req,@RequestParam String noteId,@RequestParam boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.pin(userId,noteId,condition);
 		
@@ -375,24 +332,6 @@ public class NotesController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 		
 	}	
-
-	//---------------------View Label--------------------------------
-	/**
-	 * 
-	 * @param req
-	 * @return
-	 * @throws LabelException
-	 */
-	@RequestMapping(value="/ViewAllLabels",method= RequestMethod.GET)
-	public ResponseEntity<List<ViewLabelDto>> viewAllLabels(HttpServletRequest req) throws LabelException{
-		
-		String userId = (String)req.getAttribute("token");
-		
-		List<ViewLabelDto> labelList=notesService.viewAllLabels(userId);
-		
-		return new ResponseEntity<>(labelList,HttpStatus.OK);
-		
-	}
 	
 	//-------------------View Labeled Notes-------------------------
 	/**
@@ -406,7 +345,7 @@ public class NotesController {
 	@RequestMapping(value="/ViewNoteByLabel",method= RequestMethod.GET)
 	public ResponseEntity<List<ViewNoteDto>> viewLabeledNotes(HttpServletRequest req,@RequestParam(value="labelId") String labelId) throws LabelException, NoteNotFoundException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		List<ViewNoteDto> viewNoteList = notesService.viewLabeledNotes(userId,labelId);
 		
@@ -425,7 +364,7 @@ public class NotesController {
 	@RequestMapping(value="/addcolor",method= RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> addcolor(HttpServletRequest req,@RequestParam(value="color") String color,@RequestParam(value="noteId") String noteId) throws NoteNotFoundException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.addColor(userId,color,noteId);
 		
@@ -447,7 +386,7 @@ public class NotesController {
 	@RequestMapping(value="/removecolor",method= RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> removecolor(HttpServletRequest req,@RequestParam(value="noteId") String noteId) throws NoteNotFoundException, UnauthorizedUserException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		notesService.removeColor(userId,noteId);
 		
@@ -469,7 +408,7 @@ public class NotesController {
 	@RequestMapping(value="/ViewPinnedNotes",method= RequestMethod.GET)
 	public ResponseEntity<List<ViewNoteDto>> viewPinnedNotes(HttpServletRequest req) throws NoteNotFoundException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		List<ViewNoteDto> viewNoteList = notesService.viewPinnedNotes(userId);
 		
@@ -488,7 +427,7 @@ public class NotesController {
 	@RequestMapping(value="/ViewArchivedNotes",method= RequestMethod.GET)
 	public ResponseEntity<List<ViewNoteDto>> viewArchivedNotes(HttpServletRequest req) throws NoteNotFoundException{
 		
-		String userId = (String)req.getAttribute("token");
+		String userId = (String)req.getAttribute("userId");
 		
 		List<ViewNoteDto> viewNoteList = notesService.viewArchivedNotes(userId);
 		

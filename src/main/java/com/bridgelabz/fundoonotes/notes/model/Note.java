@@ -5,9 +5,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.elasticsearch.annotations.Document;
 
-@Document(collection="notes")
+
+//@Document(collection="notes")
+@Document(indexName="noteindex",type="note")
 public class Note {
 
 	@Id

@@ -63,6 +63,8 @@ public class UserServiceImpl implements UserService {
 				+"http://192.168.0.71:8080/activateaccount/?token="+token;
 		
 		
+		System.out.println(token);
+		
 		MailDTO mailuser = new MailDTO();
 		mailuser.setEmail(user.get().getUserEmail());
 		mailuser.setSubject("Activate Account");

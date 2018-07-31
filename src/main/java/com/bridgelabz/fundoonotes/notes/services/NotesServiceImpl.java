@@ -12,16 +12,20 @@ import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
+import com.bridgelabz.fundoonotes.notes.exceptions.LabelNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
 import com.bridgelabz.fundoonotes.notes.exceptions.UnauthorizedUserException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
+import com.bridgelabz.fundoonotes.notes.model.EditLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.Label;
 import com.bridgelabz.fundoonotes.notes.model.Note;
 import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
+import com.bridgelabz.fundoonotes.notes.repositories.LabelsElasticrepository;
+import com.bridgelabz.fundoonotes.notes.repositories.NotesElasticRepository;
 import com.bridgelabz.fundoonotes.notes.repositories.LabelRepository;
 import com.bridgelabz.fundoonotes.notes.repositories.NotesRepository;
 import com.bridgelabz.fundoonotes.notes.utility.NotesUtil;
@@ -36,6 +40,12 @@ public class NotesServiceImpl implements NotesService {
 	
 	@Autowired
 	LabelRepository labelrepo;
+	
+	@Autowired
+	LabelsElasticrepository labelelasticrepo;
+	
+	@Autowired
+	NotesElasticRepository notesElasticrepo;
 	
 	@Autowired
 	JwtToken jwt;
@@ -71,7 +81,7 @@ public class NotesServiceImpl implements NotesService {
 			note.setColor(createDto.getColor());
 		
 		List<Label> labelList = new ArrayList<>();
-		labelList = labelrepo.findAllByUserId(userId);
+		labelList = labelelasticrepo.findAllByUserId(userId);
 		
 		List<ViewLabelDto> viewLableList = new ArrayList<>();
 		
@@ -103,6 +113,7 @@ public class NotesServiceImpl implements NotesService {
 							label.setUserId(userId);
 							
 							labelrepo.save(label);
+							labelelasticrepo.save(label);
 							
 							viewLable.setLabelId(label.getLabelId());
 							viewLable.setLabelName(label.getLableName());
@@ -118,6 +129,7 @@ public class NotesServiceImpl implements NotesService {
 						label.setUserId(userId);
 						
 						labelrepo.save(label);
+						labelelasticrepo.save(label);
 						
 						viewLable.setLabelId(label.getLabelId());
 						viewLable.setLabelName(label.getLableName());
@@ -149,7 +161,9 @@ public class NotesServiceImpl implements NotesService {
 			note.setReminder(null);
 		}
 		
+		
 		notesrepo.save(note);
+		notesElasticrepo.save(note);
 		
 		ViewNoteDto viewNote = new ViewNoteDto();
 		
@@ -211,7 +225,7 @@ public class NotesServiceImpl implements NotesService {
 		
 		//jwt.parseJWT(token);
 		
-		List<Note> note = notesrepo.findAllByUserId(userId);
+		List<Note> note = notesElasticrepo.findAllByUserId(userId);
 		List<ViewNoteDto> notesList = new ArrayList<>();
 		if(note.isEmpty()) {
 			throw new NoteNotFoundException("No Notes Found");
@@ -227,12 +241,10 @@ public class NotesServiceImpl implements NotesService {
 				notes.setCreatedAt(note.get(i).getCreatedAt());
 				notes.setLastModified(note.get(i).getLastModified());
 				notes.setReminder(note.get(i).getReminder());
-			
+				notes.setLabelList(note.get(i).getLabelList());
+				
 				notesList.add(notes);
 			}
-		}
-		if(notesList.isEmpty()) {
-			throw new NoteNotFoundException("No Notes Found");
 		}
 		return notesList;
 	}
@@ -255,7 +267,7 @@ public class NotesServiceImpl implements NotesService {
 		
 		//jwt.parseJWT(token);
 		
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		if(!note.isPresent() || note.get().isTrashed()) {
 			throw new NoteNotFoundException("No Notes with such Id found");
 		}
@@ -277,6 +289,8 @@ public class NotesServiceImpl implements NotesService {
 		note.get().setLastModified(NotesUtil.generateDate());
 		
 		notesrepo.save(note.get());
+		
+		notesElasticrepo.save(note.get());
 	}
 	
 	/**
@@ -294,7 +308,7 @@ public class NotesServiceImpl implements NotesService {
 		// TODO Auto-generated method stub
 		//jwt.parseJWT(token);
 		
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes With such Id");
@@ -307,7 +321,7 @@ public class NotesServiceImpl implements NotesService {
 		}
 		
 		notesrepo.delete(note.get());
-		
+		notesElasticrepo.delete(note.get());
 	}
 	
 	/**
@@ -326,7 +340,7 @@ public class NotesServiceImpl implements NotesService {
 		//jwt.parseJWT(token);
 		
 		NotesUtil.ValidateDate(dateDto);
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes With Such Id");
@@ -343,7 +357,9 @@ public class NotesServiceImpl implements NotesService {
 		
 		note.get().setReminder(date.toDate());
 		
+		notesElasticrepo.save(note.get());
 		notesrepo.save(note.get());
+		
 	}
 	/**
 	 * To UnSet A Reminder
@@ -359,7 +375,7 @@ public class NotesServiceImpl implements NotesService {
 		// TODO Auto-generated method stub
 		//jwt.parseJWT(token);
 		
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes With Such Id");
 		}
@@ -371,6 +387,7 @@ public class NotesServiceImpl implements NotesService {
 		}
 		note.get().setReminder(null);
 		
+		notesElasticrepo.save(note.get());
 		notesrepo.save(note.get());
 	}
 	
@@ -383,13 +400,13 @@ public class NotesServiceImpl implements NotesService {
 	 * @throws TokenParsingException
 	 */
 	@Override
-	public void createLable(String userId, String lableName) throws TokenParsingException, LabelException {
+	public ViewLabelDto createLable(String userId, String lableName) throws TokenParsingException, LabelException {
 		
 		if((lableName.trim().length()==0 || lableName.equals(null) || lableName.replaceAll("\"","").trim().length()==0)) {
 			throw new LabelException("No Label Name");
 		}
 		
-		List<Label> lableList = labelrepo.findAllByUserId(userId);		
+		List<Label> lableList = labelelasticrepo.findAllByUserId(userId);		
 		
 		for(int i=0;i<lableList.size();i++) {
 			if(lableList.get(i).getLableName().equals(lableName)) {
@@ -402,6 +419,13 @@ public class NotesServiceImpl implements NotesService {
 		label.setLableName(lableName);
 		
 		labelrepo.save(label);
+		labelelasticrepo.save(label);
+		
+		ViewLabelDto viewLabel = new ViewLabelDto();
+		viewLabel.setLabelId(label.getLabelId());
+		viewLabel.setLabelName(label.getLableName());
+		
+		return viewLabel;
 	}
 	/**
 	 * To Add Label
@@ -421,7 +445,7 @@ public class NotesServiceImpl implements NotesService {
 		
 		boolean flag = false;
 		
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes found");
 		}
@@ -430,7 +454,7 @@ public class NotesServiceImpl implements NotesService {
 		}
 		
 		List<Label> labelList = new ArrayList<>();
-		labelList = labelrepo.findAllByUserId(userId);
+		labelList = labelelasticrepo.findAllByUserId(userId);
 		System.out.println(labelList.size());
 		
 		if(labelList.isEmpty()) {
@@ -463,6 +487,7 @@ public class NotesServiceImpl implements NotesService {
 			label.setUserId(userId);
 			label.setLableName(labelName);
 			labelrepo.save(label);
+			labelelasticrepo.save(label);
 			
 			ViewLabelDto viewLabel = new ViewLabelDto();
 			viewLabel.setLabelName(label.getLableName());
@@ -472,6 +497,8 @@ public class NotesServiceImpl implements NotesService {
 		note.get().setLabelList(tempList);
 		
 		notesrepo.save(note.get());
+		notesElasticrepo.save(note.get());
+		
 	}
 	/**
 	 * To Remove Label
@@ -489,7 +516,7 @@ public class NotesServiceImpl implements NotesService {
 		// TODO Auto-generated method stub
 		//jwt.parseJWT(token);
 		boolean flag= false;
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes found");
 		}
@@ -517,7 +544,7 @@ public class NotesServiceImpl implements NotesService {
 		note.get().setLabelList(tempList);
 		
 		notesrepo.save(note.get());
-			
+		notesElasticrepo.save(note.get());
 	}
 	/**
 	 * To Delete Label
@@ -533,16 +560,12 @@ public class NotesServiceImpl implements NotesService {
 		// TODO Auto-generated method stub
 		//jwt.parseJWT(token);
 		
-		Optional<Label> label = labelrepo.findById(labelId);
+		Optional<Label> label = labelelasticrepo.findById(labelId);
 		if(!label.isPresent()) {
 			throw new LabelException("No Such Label");
 		}
-		List<Note> noteList = notesrepo.findAllByUserId(userId);
-		
-		if(noteList.isEmpty()) {
-			throw new NoteNotFoundException("No Notes Present");
-		}
-		
+		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
+				
 		for(int i=0;i<noteList.size();i++) {
 			List<ViewLabelDto> labelList = noteList.get(i).getLabelList();
 			if(!labelList.isEmpty()) {
@@ -556,9 +579,10 @@ public class NotesServiceImpl implements NotesService {
 			}
 			noteList.get(i).setLabelList(labelList);
 			notesrepo.save(noteList.get(i));
+			notesElasticrepo.save(noteList.get(i));
 		}
 		labelrepo.deleteById(labelId);
-		
+		labelelasticrepo.deleteById(labelId);
 	}
 	/**
 	 * To Archive/Unarchive
@@ -576,7 +600,7 @@ public class NotesServiceImpl implements NotesService {
 		
 		//jwt.parseJWT(token);
 		
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes Present");
@@ -584,12 +608,11 @@ public class NotesServiceImpl implements NotesService {
 		if(!note.get().getUserId().equals(userId)) {
 			throw new UnauthorizedUserException("UnAuthorized User");
 		}
-		if(condition) {
-			note.get().setArchived(true);
-		}else {
-			note.get().setArchived(false);
-		}
+		
+		note.get().setArchived(condition);
 		notesrepo.save(note.get());
+		notesElasticrepo.save(note.get());
+		
 	}
 	/**
 	 * To Pin/UnPin
@@ -606,7 +629,7 @@ public class NotesServiceImpl implements NotesService {
 		// TODO Auto-generated method stub
 		//jwt.parseJWT(token);
 		
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes Present");
@@ -615,13 +638,10 @@ public class NotesServiceImpl implements NotesService {
 			throw new UnauthorizedUserException("UnAuthorized User");
 		}
 		
-		if(condition) {
-			note.get().setPinned(true);
-		}else {
-			note.get().setPinned(false);
-		}
+		note.get().setPinned(condition);
 		
 		notesrepo.save(note.get());
+		notesElasticrepo.save(note.get());
 	}
 	/**
 	 * To View All Labels
@@ -632,13 +652,10 @@ public class NotesServiceImpl implements NotesService {
 	@Override
 	public List<ViewLabelDto> viewAllLabels(String userId) throws LabelException {
 		// TODO Auto-generated method stub
-		List<Label> labelList = labelrepo.findAllByUserId(userId);
+		List<Label> labelList = labelelasticrepo.findAllByUserId(userId);
 		List<ViewLabelDto> viewLabelList = new ArrayList<>();
 		
 		
-		if(labelList.isEmpty()) {
-			throw new LabelException("No Labels");
-		}
 		for(int i=0;i<labelList.size();i++) {
 			ViewLabelDto viewLabel = new ViewLabelDto();
 			viewLabel.setLabelId(labelList.get(i).getLabelId());
@@ -661,8 +678,8 @@ public class NotesServiceImpl implements NotesService {
 	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException {
 		// TODO Auto-generated method stub
 		
-		Optional<Label> label = labelrepo.findById(labelId);
-		List<Note> noteList = notesrepo.findAllByUserId(userId);
+		Optional<Label> label = labelelasticrepo.findById(labelId);
+		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
 		
 		if(!label.isPresent()) {
 			throw new LabelException("No Labels");
@@ -710,7 +727,7 @@ public class NotesServiceImpl implements NotesService {
 	@Override
 	public void addColor(String userId, String color,String noteId) throws NoteNotFoundException, UnauthorizedUserException {
 		// TODO Auto-generated method stub
-		Optional<Note> note = notesrepo.findById(noteId);
+		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes");
@@ -721,6 +738,7 @@ public class NotesServiceImpl implements NotesService {
 		
 		note.get().setColor(color);
 		
+		notesrepo.save(note.get());
 		notesrepo.save(note.get());
 		
 	}
@@ -757,7 +775,7 @@ public class NotesServiceImpl implements NotesService {
 	@Override
 	public List<ViewNoteDto> viewPinnedNotes(String userId) throws NoteNotFoundException {
 		// TODO Auto-generated method stub
-		List<Note> noteList = notesrepo.findAllByUserId(userId);
+		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
 		
 		if(!noteList.isEmpty()) {
 			throw new NoteNotFoundException("No Notes");
@@ -807,7 +825,7 @@ public class NotesServiceImpl implements NotesService {
 	@Override
 	public List<ViewNoteDto> viewArchivedNotes(String userId) throws NoteNotFoundException {
 		// TODO Auto-generated method stub
-		List<Note> noteList = notesrepo.findAllByUserId(userId);
+		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
 		
 		if(!noteList.isEmpty()) {
 			throw new NoteNotFoundException("No Notes");
@@ -830,5 +848,31 @@ public class NotesServiceImpl implements NotesService {
 			}
 		}
 		return viewnoteList;
+	}
+	/**
+	 * To Edit Label
+	 * 
+	 * @param userId
+	 * @param labelId
+	 * @param EditLabelDto
+	 * @throws LabelException
+	 * @throws LabelNotFoundException
+	 */
+	@Override
+	public void editLabel(String userId, String labelId, EditLabelDto editLableDto) throws LabelException, LabelNotFoundException {
+		// TODO Auto-generated method stub
+		if(editLableDto.getName().trim().length()==0) {
+			throw new LabelException("No Label Name");
+		}
+		
+		Optional<Label> label = labelrepo.findByLabelIdAndUserId(labelId, userId);
+		
+		if(!label.isPresent()) {
+			throw new LabelNotFoundException("No Labels Present");
+		}
+		label.get().setLableName(editLableDto.getName());
+		
+		labelrepo.save(label.get());
+		labelelasticrepo.save(label.get());
 	}
 }

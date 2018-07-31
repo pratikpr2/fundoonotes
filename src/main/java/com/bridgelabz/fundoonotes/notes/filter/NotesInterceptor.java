@@ -27,7 +27,7 @@ public class NotesInterceptor implements HandlerInterceptor {
 		//System.out.println(userId);
 		if(repo.findById(userId).isPresent()) {
 			//System.out.println(jwt.getUserId(token));
-			request.setAttribute("token",jwt.getUserId(token));
+			request.setAttribute("userId",jwt.getUserId(token));
 			
 			return true;
 			

@@ -9,6 +9,7 @@ import com.bridgelabz.fundoonotes.notes.filter.NotesInterceptor;
 import com.bridgelabz.fundoonotes.user.filters.LoggerInterceptor;
 
 @Configuration
+
 public class InterceptorConfiguration implements WebMvcConfigurer {
 
 	@Autowired
@@ -20,7 +21,7 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(logInterceptor).addPathPatterns("/**");
-		registry.addInterceptor(noteInterceptor).addPathPatterns("/notes/**");
+		registry.addInterceptor(noteInterceptor).addPathPatterns("/api/notes/**","/api/labels/**");
 	}
 	
 }

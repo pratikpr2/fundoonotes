@@ -94,6 +94,17 @@ public class GlobalNotesException {
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}
+	@ExceptionHandler(LabelNotFoundException.class)
+	public ResponseEntity<NoteResponseDto> handleLabelNotFound(LabelNotFoundException exception){
+		logger.error("Error Occured while Finding Label: "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-4);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<NoteResponseDto> handleGlobalException(Exception exception){

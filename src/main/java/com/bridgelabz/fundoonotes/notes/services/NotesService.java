@@ -6,11 +6,13 @@ import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
+import com.bridgelabz.fundoonotes.notes.exceptions.LabelNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
 import com.bridgelabz.fundoonotes.notes.exceptions.UnauthorizedUserException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
+import com.bridgelabz.fundoonotes.notes.model.EditLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
@@ -32,7 +34,7 @@ public interface NotesService {
 
 	public void unsetReminder(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 
-	public void createLable(String userId, String lableName) throws TokenParsingException, LabelException;
+	public ViewLabelDto createLable(String userId, String lableName) throws TokenParsingException, LabelException;
 
 	public void addLable(String userId, String noteId, String labelId) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException;
 
@@ -55,5 +57,7 @@ public interface NotesService {
 	public List<ViewNoteDto> viewPinnedNotes(String userId) throws NoteNotFoundException;
 
 	public List<ViewNoteDto> viewArchivedNotes(String userId) throws NoteNotFoundException;
+
+	public void editLabel(String userId, String labelId, EditLabelDto editLableDto) throws LabelException, LabelNotFoundException;
 	
 }

@@ -4,11 +4,9 @@ import javax.mail.MessagingException;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundoonotes.user.model.MailDTO;
-import com.bridgelabz.fundoonotes.user.repository.UserRepository;
 import com.bridgelabz.fundoonotes.user.services.UserMailService;
 
 @Service
