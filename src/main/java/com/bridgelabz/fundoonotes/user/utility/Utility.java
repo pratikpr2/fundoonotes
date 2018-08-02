@@ -1,5 +1,7 @@
 package com.bridgelabz.fundoonotes.user.utility;
 
+import java.util.UUID;
+
 import javax.security.auth.login.LoginException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,5 +79,10 @@ public class Utility {
 		JwtToken jwt = new JwtToken();
 		String token = jwt.createJWT(user);
 		return token;
+	}
+	
+	public static String generate() {
+		UUID uuid = UUID.randomUUID();
+		return uuid.toString();
 	}
 }

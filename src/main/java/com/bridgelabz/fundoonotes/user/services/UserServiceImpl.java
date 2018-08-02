@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bridgelabz.fundoonotes.notes.repositories.TokenRepository;
 import com.bridgelabz.fundoonotes.user.exception.ActivationException;
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
@@ -34,6 +35,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	TokenRepository tokenRepo;
 	
 	@Autowired
 	ProducerService producer;
@@ -128,7 +132,9 @@ public class UserServiceImpl implements UserService {
 		
 		Utility.validateChangePassDto(reset);
 	
-		Optional<User> user = mongoRepo.findById(jwt.getUserId(token));
+		String userId = tokenRepo.find(token);
+		
+		Optional<User> user = mongoRepo.findById(userId);
 		
 		if(!user.isPresent()) {
 			throw new ActivationException("Invalid User");
@@ -148,10 +154,10 @@ public class UserServiceImpl implements UserService {
 			throw new ChangePassException("User Is Not Registered");
 		}
 		
-		String currentJwt = Utility.generateToken(checkUser.get());
-		
+		//String currentJwt = Utility.generateToken(checkUser.get());
+		String UUID = Utility.generate();
 		String mailBody = "Click here to reset Password:\n\n"
-				+"http://192.168.0.71:8080/resetpassword/?token="+currentJwt;
+				+"http://192.168.0.71:8080/resetpassword/?token="+UUID;
 		
 		MailDTO usermail = new MailDTO();
 		usermail.setEmail(mail.getEmail());
