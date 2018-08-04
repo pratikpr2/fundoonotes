@@ -19,7 +19,7 @@ import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.model.EditLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
-import com.bridgelabz.fundoonotes.notes.services.NotesService;
+import com.bridgelabz.fundoonotes.notes.services.LabelService;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 
 @RestController
@@ -27,7 +27,7 @@ import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 public class LabelController {
 	
 	@Autowired
-	private NotesService notesService;
+	private LabelService notesService;
 	
 	
 //---------------------Create Label---------------------------
@@ -45,7 +45,7 @@ public class LabelController {
 		
 		String userId = (String)req.getAttribute("userId");
 		
-		ViewLabelDto viewLabel= notesService.createLable(userId, labelName);
+		ViewLabelDto viewLabel= notesService.createLabel(userId, labelName);
 
 		return new ResponseEntity<>(viewLabel,HttpStatus.OK);
 	}
@@ -77,13 +77,14 @@ public class LabelController {
 	 * 
 	 * @throws LabelException
 	 * @throws NoteNotFoundException
+	 * @throws LabelNotFoundException 
 	 */
 	@RequestMapping(value="/deletelabel",method= RequestMethod.DELETE)
-	public ResponseEntity<NoteResponseDto> deleteLable(HttpServletRequest req, @RequestParam(value="labelId") String labelId) throws TokenParsingException, LabelException, NoteNotFoundException{
+	public ResponseEntity<NoteResponseDto> deleteLable(HttpServletRequest req, @RequestParam(value="labelId") String labelId) throws TokenParsingException, LabelException, NoteNotFoundException, LabelNotFoundException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
-		notesService.deleteLable(userId,labelId);
+		notesService.deleteLabel(userId,labelId);
 		
 		NoteResponseDto response = new NoteResponseDto();
 		response.setMessage("Label Deleted");

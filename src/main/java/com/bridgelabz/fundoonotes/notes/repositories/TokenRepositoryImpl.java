@@ -3,40 +3,45 @@ package com.bridgelabz.fundoonotes.notes.repositories;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class TokenRepositoryImpl implements TokenRepository {
-
-	private static final String KEY = "PRATIK";
+	
+	@Value("${mykey}")
+	private String KEY;
 	
 	
 	private RedisTemplate<String, String> redisTemplate;
+	
 	private HashOperations<String,String, String> hashOperation;
 	
 	@Autowired
 	public TokenRepositoryImpl(RedisTemplate<String, String> redistemp) {
-		// TODO Auto-generated constructor stub
-		this.redisTemplate=redistemp;
-	}
-	
-	@PostConstruct
-	public void init() {
-		hashOperation = redisTemplate.opsForHash();
+				this.redisTemplate=redistemp;
+				hashOperation = this.redisTemplate.opsForHash();
 	}
 	
 	@Override
-	public void save(String token, String userId) {
-		// TODO Auto-generated method stub
-		hashOperation.put(KEY, token, userId);
+	public void save(String UUID, String userId) {
+		hashOperation.put(KEY, UUID, userId);
 	}
 
 	@Override
-	public String find(String token) {
+	public String find(String UUID) {
 		// TODO Auto-generated method stub
-		return hashOperation.get(KEY, token);
+		return hashOperation.get(KEY, UUID);
 	}
 
+	@Override
+	public void delete(String UUID) {
+		// TODO Auto-generated method stub
+		hashOperation.delete(KEY, UUID);
+	}
+
+	
+	
 }

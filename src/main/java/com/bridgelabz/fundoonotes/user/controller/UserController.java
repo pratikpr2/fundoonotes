@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.fundoonotes.user.exception.ActivationException;
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
+import com.bridgelabz.fundoonotes.user.exception.MalformedUUIDException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 import com.bridgelabz.fundoonotes.user.model.ChangePassDTO;
@@ -32,12 +33,16 @@ public class UserController {
 
 	// -------------------Login--------------------------
 
+	/**
+	 * @param checkUser
+	 * @param response
+	 * @return Login Response
+	 * @throws LoginException
+	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public ResponseEntity<ResponseDto> login(@RequestBody LoginDTO checkUser,HttpServletResponse res) throws LoginException {
+	public ResponseEntity<ResponseDto> login(@RequestBody LoginDTO loginDto,HttpServletResponse res) throws LoginException {
 
-		// System.out.println("Inside Login");
-		
-		userService.login(checkUser);
+		userService.login(loginDto);
 		
 		ResponseDto response = new ResponseDto();
 		response.setMessage("SuccessFully LoggedIn");
@@ -49,11 +54,17 @@ public class UserController {
 
 	// ----------------Register---------------------------
 
+	/**
+	 * @param regUser
+	 * @return Registration Response
+	 * @throws RegistrationException
+	 * @throws MessagingException
+	 */
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<ResponseDto> register(@RequestBody RegistrationDTO regUser)
+	public ResponseEntity<ResponseDto> register(@RequestBody RegistrationDTO regDto)
 			throws RegistrationException, MessagingException {
 
-		userService.register(regUser);
+		userService.register(regDto);
 
 		ResponseDto response = new ResponseDto();
 		response.setMessage("SuccessFully Registered");
@@ -63,26 +74,41 @@ public class UserController {
 	}
 	// -------------------Activate Account-------------------
 
+	/**
+	 * @param token
+	 * @return Activation Response
+	 * @throws RegistrationException
+	 * @throws ActivationException
+	 * @throws TokenParsingException
+	 */
 	@RequestMapping(value = "/activateaccount", method = RequestMethod.POST)
 	public ResponseEntity<ResponseDto> activateaccount(@RequestParam(value = "token") String token)
 			throws RegistrationException, ActivationException, TokenParsingException {
-		// System.out.println(hsr.getQueryString());
-		// String token = hsr.getQueryString();
-		ResponseDto response = new ResponseDto();
+	
 		userService.activateUser(token);
+		
+		ResponseDto response = new ResponseDto();
 		response.setMessage("Account Activated SuccesFully");
 		response.setStatus(1);
+		
 		return new ResponseEntity<>(response, HttpStatus.OK);
 		
 	}
 	
 	//----------------------Forget PassWord----------------------
 
+	/**
+	 * @param user
+	 * @return Mail Response
+	 * @throws ChangePassException
+	 * @throws MessagingException
+	 */
 	@RequestMapping(value = "/forgetpassword", method = RequestMethod.POST)
 	public ResponseEntity<ResponseDto> forgetPassword(@RequestBody MailUser user)
 			throws ChangePassException, MessagingException {
 
 		userService.sendMail(user);
+		
 		ResponseDto response = new ResponseDto();
 		response.setMessage("Please Check Mail To Confirm Changing Password");
 		response.setStatus(2);
@@ -92,14 +118,21 @@ public class UserController {
 	
 	//----------------------Reset PassWord------------------------
 
+	/**
+	 * @param reset
+	 * @param token
+	 * @return ResetPassword Response
+	 * @throws ChangePassException
+	 * @throws MessagingException
+	 * @throws ActivationException
+	 * @throws TokenParsingException
+	 * @throws MalformedUUIDException
+	 */
 	@RequestMapping(value = "/resetpassword", method = RequestMethod.PUT)
 	private ResponseEntity<ResponseDto> resetpassword(@RequestBody ChangePassDTO reset,
 			@RequestParam(value = "token") String token)
-			throws ChangePassException, MessagingException, ActivationException, TokenParsingException {
+			throws ChangePassException, MessagingException, ActivationException, TokenParsingException, MalformedUUIDException {
 
-		
-
-		userService.activateUser(token);
 		userService.changePassword(reset, token);
 		
 		ResponseDto response = new ResponseDto();

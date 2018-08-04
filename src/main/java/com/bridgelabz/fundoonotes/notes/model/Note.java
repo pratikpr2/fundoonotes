@@ -7,8 +7,6 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-
-//@Document(collection="notes")
 @Document(indexName="noteindex",type="note")
 public class Note {
 
@@ -25,6 +23,7 @@ public class Note {
 	private boolean isTrashed;
 	private boolean isArchived;
 	private boolean isPinned;
+	private List<URLMetadata> urlData = new ArrayList<>();
 	
 	public String getUserId() {
 		return userId;
@@ -106,6 +105,12 @@ public class Note {
 	}
 	public void setPinned(boolean isPinned) {
 		this.isPinned = isPinned;
+	}
+	public List<URLMetadata> getUrlData() {
+		return urlData;
+	}
+	public void setUrlData(List<URLMetadata> urlData) {
+		this.urlData = urlData;
 	}
 	
 

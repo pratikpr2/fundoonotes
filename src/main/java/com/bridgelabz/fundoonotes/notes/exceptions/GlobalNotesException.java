@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
+import com.bridgelabz.fundoonotes.user.exception.MalformedLinkException;
 
 @ControllerAdvice
 public class GlobalNotesException {
@@ -102,6 +103,17 @@ public class GlobalNotesException {
 		
 		response.setMessage(exception.getMessage());
 		response.setStatus(-4);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
+	@ExceptionHandler(MalformedLinkException.class)
+	public ResponseEntity<NoteResponseDto> handleMalformedLink(MalformedLinkException exception){
+		logger.error("Error Occured while Scrapping Lin: "+ exception.getMessage(),exception);
+	
+		NoteResponseDto response = new NoteResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(5);
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 	}

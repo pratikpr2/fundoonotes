@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.bridgelabz.fundoonotes.user.exception.ActivationException;
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
 import com.bridgelabz.fundoonotes.user.exception.MailException;
+import com.bridgelabz.fundoonotes.user.exception.MalformedUUIDException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 import com.bridgelabz.fundoonotes.user.model.ResponseDto;
@@ -102,8 +103,17 @@ public class GlobalExceptionHandler{
 		response.setStatus(-1);
 		
 		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
-		
-		
 	}
-	
+	@ExceptionHandler(MalformedUUIDException.class)
+	public ResponseEntity<ResponseDto> malformedUUIDException(MalformedUUIDException exception){
+		
+		logger.error("Error Occured while parsing UUID: " + exception.getMessage(),exception);
+		
+		ResponseDto response = new ResponseDto();
+		
+		response.setMessage(exception.getMessage());
+		response.setStatus(-5);
+		
+		return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+	}
 }

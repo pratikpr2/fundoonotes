@@ -1,5 +1,6 @@
 package com.bridgelabz.fundoonotes.notes.services;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
@@ -16,6 +17,7 @@ import com.bridgelabz.fundoonotes.notes.model.EditLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
+import com.bridgelabz.fundoonotes.user.exception.MalformedLinkException;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 
 public interface NotesService {
@@ -34,19 +36,13 @@ public interface NotesService {
 
 	public void unsetReminder(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 
-	public ViewLabelDto createLable(String userId, String lableName) throws TokenParsingException, LabelException;
-
 	public void addLable(String userId, String noteId, String labelId) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException;
 
 	public void removeLabel(String userId, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException;
 
-	public void deleteLable(String userId, String labelId) throws TokenParsingException, LabelException, NoteNotFoundException;
-
 	public void archive(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
 
 	public void pin(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException;
-
-	public List<ViewLabelDto> viewAllLabels(String userId) throws LabelException;
 
 	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException;
 
@@ -57,7 +53,6 @@ public interface NotesService {
 	public List<ViewNoteDto> viewPinnedNotes(String userId) throws NoteNotFoundException;
 
 	public List<ViewNoteDto> viewArchivedNotes(String userId) throws NoteNotFoundException;
-
-	public void editLabel(String userId, String labelId, EditLabelDto editLableDto) throws LabelException, LabelNotFoundException;
 	
+	public ViewNoteDto addLink(String userId,String noteId,String link) throws NoteNotFoundException, UnauthorizedUserException, MalformedLinkException;
 }

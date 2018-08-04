@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
 import com.bridgelabz.fundoonotes.user.exception.MailException;
+import com.bridgelabz.fundoonotes.user.exception.MalformedUUIDException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
 import com.bridgelabz.fundoonotes.user.model.ChangePassDTO;
 import com.bridgelabz.fundoonotes.user.model.LoginDTO;
@@ -84,5 +85,12 @@ public class Utility {
 	public static String generate() {
 		UUID uuid = UUID.randomUUID();
 		return uuid.toString();
+	}
+
+	public static void validateUUID(String UUID) throws MalformedUUIDException {
+		// TODO Auto-generated method stub
+		if(UUID==null) {
+			throw new MalformedUUIDException("Malformed UUID");
+		}
 	}
 }

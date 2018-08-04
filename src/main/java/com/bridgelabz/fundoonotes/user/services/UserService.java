@@ -5,6 +5,7 @@ import javax.security.auth.login.LoginException;
 
 import com.bridgelabz.fundoonotes.user.exception.ActivationException;
 import com.bridgelabz.fundoonotes.user.exception.ChangePassException;
+import com.bridgelabz.fundoonotes.user.exception.MalformedUUIDException;
 import com.bridgelabz.fundoonotes.user.exception.RegistrationException;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 import com.bridgelabz.fundoonotes.user.model.ChangePassDTO;
@@ -20,8 +21,8 @@ public interface UserService {
 
 	public void activateUser(String token) throws ActivationException, TokenParsingException;
 
-	public void changePassword(ChangePassDTO reset, String token)
-			throws ChangePassException, MessagingException, ActivationException, TokenParsingException;
+	public void changePassword(ChangePassDTO reset, String UUID)
+			throws ChangePassException, MessagingException, ActivationException, TokenParsingException, MalformedUUIDException;
 
 	public void sendMail(MailUser mail) throws MessagingException, ChangePassException;
 

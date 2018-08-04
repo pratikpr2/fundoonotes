@@ -1,5 +1,6 @@
 package com.bridgelabz.fundoonotes.notes.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.notes.services.NotesService;
+import com.bridgelabz.fundoonotes.user.exception.MalformedLinkException;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
 
 @RestController
@@ -44,7 +46,7 @@ public class NotesController {
 	 * @param createDto
 	 * @param isPinned
 	 * @param isArchived
-	 * @return
+	 * @return Created Note
 	 * @throws CreateDtoException
 	 * @throws TokenParsingException
 	 * @throws InvalidDateFormatException
@@ -65,7 +67,7 @@ public class NotesController {
 	/**
 	 * 
 	 * @param req
-	 * @return
+	 * @return List of Notes
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 */
@@ -85,7 +87,7 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param editNoteDto
-	 * @return
+	 * @return Edit Response
 	 * @throws TokenParsingException
 	 * @throws EditDtoException
 	 * @throws NoteNotFoundException
@@ -111,7 +113,7 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param condition
-	 * @return
+	 * @return Trash Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
@@ -142,7 +144,7 @@ public class NotesController {
 	 * 
 	 * @param req
 	 * @param noteId
-	 * @return
+	 * @return Delete Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
@@ -168,14 +170,14 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param dateDto
-	 * @return
+	 * @return Reminder Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
 	 * @throws InvalidDateFormatException
 	 */
-	@RequestMapping(value="/addreminder",method=RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> setReminder(HttpServletRequest req, @RequestParam(value="noteId") String noteId,@RequestBody DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, InvalidDateFormatException{
+	@RequestMapping(value="/addreminder/{noteId}",method=RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> setReminder(HttpServletRequest req, @PathVariable String noteId,@RequestBody DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, InvalidDateFormatException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
@@ -192,7 +194,7 @@ public class NotesController {
 	 * 
 	 * @param req
 	 * @param noteId
-	 * @return
+	 * @return Reminder response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
@@ -220,14 +222,14 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param labelName
-	 * @return
+	 * @return Label Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws LabelException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/addlabel",method=RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> addLabel(HttpServletRequest req, @RequestParam(value="noteId") String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
+	@RequestMapping(value="/addlabel/{noteId}",method=RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> addLabel(HttpServletRequest req, @PathVariable String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
@@ -246,14 +248,14 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param labelName
-	 * @return
+	 * @return Label Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws LabelException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/removelabel",method=RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> removeLabel(HttpServletRequest req, @RequestParam(value="noteId") String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
+	@RequestMapping(value="/removelabel/{noteId}",method=RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> removeLabel(HttpServletRequest req, @PathVariable String noteId, @RequestBody String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
@@ -274,12 +276,12 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param condition
-	 * @return
+	 * @return Archive Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/archive",method= RequestMethod.PUT)
+	@RequestMapping(value="/archive/{noteId}",method= RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> archive(HttpServletRequest req,@RequestParam String noteId,@RequestParam boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
 		String userId = (String)req.getAttribute("userId");
@@ -306,12 +308,12 @@ public class NotesController {
 	 * @param req
 	 * @param noteId
 	 * @param condition
-	 * @return
+	 * @return Pin Response
 	 * @throws TokenParsingException
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/pin",method= RequestMethod.PUT)
+	@RequestMapping(value="/pin/{noteId}",method= RequestMethod.PUT)
 	public ResponseEntity<NoteResponseDto> pin(HttpServletRequest req,@RequestParam String noteId,@RequestParam boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException{
 		
 		
@@ -338,12 +340,12 @@ public class NotesController {
 	 * 
 	 * @param req
 	 * @param labelId
-	 * @return
+	 * @return List of Labels
 	 * @throws LabelException
 	 * @throws NoteNotFoundException
 	 */
-	@RequestMapping(value="/ViewNoteByLabel",method= RequestMethod.GET)
-	public ResponseEntity<List<ViewNoteDto>> viewLabeledNotes(HttpServletRequest req,@RequestParam(value="labelId") String labelId) throws LabelException, NoteNotFoundException{
+	@RequestMapping(value="/ViewNoteByLabel/{labelId}",method= RequestMethod.GET)
+	public ResponseEntity<List<ViewNoteDto>> viewLabeledNotes(HttpServletRequest req,@PathVariable String labelId) throws LabelException, NoteNotFoundException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
@@ -357,12 +359,12 @@ public class NotesController {
 	 * @param req
 	 * @param color
 	 * @param noteId
-	 * @return
+	 * @return Color Response
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/addcolor",method= RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> addcolor(HttpServletRequest req,@RequestParam(value="color") String color,@RequestParam(value="noteId") String noteId) throws NoteNotFoundException, UnauthorizedUserException{
+	@RequestMapping(value="/addcolor/{noteId}",method= RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> addcolor(HttpServletRequest req,@RequestParam(value="color") String color,@PathVariable String noteId) throws NoteNotFoundException, UnauthorizedUserException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
@@ -383,8 +385,8 @@ public class NotesController {
 	 * @throws NoteNotFoundException
 	 * @throws UnauthorizedUserException
 	 */
-	@RequestMapping(value="/removecolor",method= RequestMethod.PUT)
-	public ResponseEntity<NoteResponseDto> removecolor(HttpServletRequest req,@RequestParam(value="noteId") String noteId) throws NoteNotFoundException, UnauthorizedUserException{
+	@RequestMapping(value="/removecolor/{noteId}",method= RequestMethod.PUT)
+	public ResponseEntity<NoteResponseDto> removecolor(HttpServletRequest req,@PathVariable String noteId) throws NoteNotFoundException, UnauthorizedUserException{
 		
 		String userId = (String)req.getAttribute("userId");
 		
@@ -401,7 +403,7 @@ public class NotesController {
 	 * 
 	 * @param req
 	 * @param labelId
-	 * @return
+	 * @return List of Pinned Notes
 	 * @throws LabelException
 	 * @throws NoteNotFoundException
 	 */
@@ -432,5 +434,23 @@ public class NotesController {
 		List<ViewNoteDto> viewNoteList = notesService.viewArchivedNotes(userId);
 		
 		return new ResponseEntity<>(viewNoteList,HttpStatus.OK);
+	}
+	/**
+	 * @param req
+	 * @param noteId
+	 * @param link
+	 * @return ViewNoteDto
+	 * @throws NoteNotFoundException
+	 * @throws UnauthorizedUserException
+	 * @throws MalformedLinkException 
+	 */
+	@RequestMapping(value="/AddLink",method= RequestMethod.PUT)
+	public ResponseEntity<ViewNoteDto> addLink(HttpServletRequest req,@PathVariable String noteId,@RequestBody String link) throws NoteNotFoundException, UnauthorizedUserException, MalformedLinkException{
+		
+		String userId = (String)req.getAttribute("userId");
+		
+		ViewNoteDto viewnoteDto = notesService.addLink(userId, noteId, link);
+		
+		return new ResponseEntity<>(viewnoteDto,HttpStatus.OK);
 	}
 }
