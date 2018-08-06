@@ -1,7 +1,5 @@
 package com.bridgelabz.fundoonotes.notes.repositories;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
@@ -32,13 +30,13 @@ public class TokenRepositoryImpl implements TokenRepository {
 
 	@Override
 	public String find(String UUID) {
-		// TODO Auto-generated method stub
+		
 		return hashOperation.get(KEY, UUID);
 	}
 
 	@Override
 	public void delete(String UUID) {
-		// TODO Auto-generated method stub
+		
 		hashOperation.delete(KEY, UUID);
 	}
 

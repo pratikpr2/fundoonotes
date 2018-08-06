@@ -1,9 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.bridgelabz.fundoonotes.TestServices
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 5.965 s <<< FAILURE! - in com.bridgelabz.fundoonotes.TestServices
-login(com.bridgelabz.fundoonotes.TestServices)  Time elapsed: 0.005 s  <<< ERROR!
-java.lang.IllegalStateException: Failed to load ApplicationContext
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'tokenRepositoryImpl' defined in file [/home/bridgelabz/fundoonotes/fundoonotes/target/classes/com/bridgelabz/fundoonotes/notes/repositories/TokenRepositoryImpl.class]: Unsatisfied dependency expressed through constructor parameter 0; nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'org.springframework.data.redis.core.RedisTemplate<?, ?>' available: expected single matching bean but found 2: redisTemplate,stringRedisTemplate
-Caused by: org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'org.springframework.data.redis.core.RedisTemplate<?, ?>' available: expected single matching bean but found 2: redisTemplate,stringRedisTemplate
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 7.672 s <<< FAILURE! - in com.bridgelabz.fundoonotes.TestServices
+login(com.bridgelabz.fundoonotes.TestServices)  Time elapsed: 0.486 s  <<< FAILURE!
+java.lang.AssertionError: JSON path "$.message" expected:<SuccessFully LoggedIn> but was:<java.net.ConnectException: Connection refused (Connection refused)>
+	at com.bridgelabz.fundoonotes.TestServices.login(TestServices.java:48)
 

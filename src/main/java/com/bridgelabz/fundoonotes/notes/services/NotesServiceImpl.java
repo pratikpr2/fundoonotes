@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -170,21 +170,26 @@ public class NotesServiceImpl implements NotesService {
 			note.setReminder(null);
 		}
 		
+		List<URLMetadata> urlList = new ArrayList<>();
+		
+		UrlValidator url = new UrlValidator();
+		
+		if(!createDto.getLink().isEmpty()) {
+			createDto.getLink().stream().filter(linkStream -> url.isValid(linkStream)).forEach(filterStream -> {
+				try {
+					urlList.add(NotesUtil.getLinkMetaData(filterStream));
+				} catch (MalformedLinkException e) {
+					e.getMessage();
+				}
+			});
+		}
+		
+		note.setUrlData(urlList);
 		
 		notesrepo.save(note);
 		notesElasticrepo.save(note);
 		
-		ViewNoteDto viewNote = new ViewNoteDto();
-		
-		modelMapper.map(viewNote, Note.class);
-		
-		/*viewNote.setBody(note.getBody());
-		viewNote.setTitle(note.getTitle());
-		viewNote.setCreatedAt(note.getCreatedAt());
-		viewNote.setLastModified(note.getLastModified());
-		viewNote.setReminder(note.getReminder());
-		viewNote.setColor(note.getColor());
-		viewNote.setLabelList(note.getLabelList());*/
+		ViewNoteDto viewNote = modelMapper.map(note, ViewNoteDto.class);
 		
 		return viewNote;
 		
@@ -202,8 +207,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void trash(String userId,String noteId,boolean condition ) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
-		//jwt.parseJWT(token);
 		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
@@ -298,8 +301,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void deleteForever(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException, NoteNotTrashedException {
-		// TODO Auto-generated method stub
-		//jwt.parseJWT(token);
 		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
@@ -329,8 +330,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void reminder(String userId, String noteId,DateDto dateDto) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException,InvalidDateFormatException {
-		// TODO Auto-generated method stub
-		//jwt.parseJWT(token);
 		
 		NotesUtil.ValidateDate(dateDto);
 		Optional<Note> note = notesElasticrepo.findById(noteId);
@@ -367,8 +366,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void unsetReminder(String userId, String noteId) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
-		//jwt.parseJWT(token);
 		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
 		if(!note.isPresent()) {
@@ -471,10 +468,11 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void removeLabel(String userId, String noteId, String labelName) throws TokenParsingException, NoteNotFoundException, LabelException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
-		//jwt.parseJWT(token);
+		
 		boolean flag= false;
+		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
+		
 		if(!note.isPresent()) {
 			throw new NoteNotFoundException("No Notes found");
 		}
@@ -516,9 +514,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void archive(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
-		
-		//jwt.parseJWT(token);
 		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
@@ -546,8 +541,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void pin(String userId, String noteId, boolean condition) throws TokenParsingException, NoteNotFoundException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
-		//jwt.parseJWT(token);
 		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
@@ -574,7 +567,6 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public List<ViewNoteDto> viewLabeledNotes(String userId, String labelId) throws LabelException, NoteNotFoundException {
-		// TODO Auto-generated method stub
 		
 		Optional<Label> label = labelelasticrepo.findById(labelId);
 		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
@@ -624,7 +616,7 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void addColor(String userId, String color,String noteId) throws NoteNotFoundException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
+		
 		Optional<Note> note = notesElasticrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
@@ -650,7 +642,7 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public void removeColor(String userId, String noteId) throws NoteNotFoundException, UnauthorizedUserException {
-		// TODO Auto-generated method stub
+
 		Optional<Note> note = notesrepo.findById(noteId);
 		
 		if(!note.isPresent()) {
@@ -672,7 +664,7 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public List<ViewNoteDto> viewPinnedNotes(String userId) throws NoteNotFoundException {
-		// TODO Auto-generated method stub
+
 		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
 		
 		if(!noteList.isEmpty()) {
@@ -704,7 +696,7 @@ public class NotesServiceImpl implements NotesService {
 	 */
 	@Override
 	public List<ViewNoteDto> viewArchivedNotes(String userId) throws NoteNotFoundException {
-		// TODO Auto-generated method stub
+
 		List<Note> noteList = notesElasticrepo.findAllByUserId(userId);
 		
 		if(!noteList.isEmpty()) {

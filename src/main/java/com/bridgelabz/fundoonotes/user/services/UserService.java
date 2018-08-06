@@ -24,6 +24,6 @@ public interface UserService {
 	public void changePassword(ChangePassDTO reset, String UUID)
 			throws ChangePassException, MessagingException, ActivationException, TokenParsingException, MalformedUUIDException;
 
-	public void sendMail(MailUser mail) throws MessagingException, ChangePassException;
+	public void forgetPassword(MailUser mail) throws MessagingException, ChangePassException;
 
 }

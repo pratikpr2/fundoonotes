@@ -107,7 +107,7 @@ public class UserController {
 	public ResponseEntity<ResponseDto> forgetPassword(@RequestBody MailUser user)
 			throws ChangePassException, MessagingException {
 
-		userService.sendMail(user);
+		userService.forgetPassword(user);
 		
 		ResponseDto response = new ResponseDto();
 		response.setMessage("Please Check Mail To Confirm Changing Password");
@@ -141,5 +141,6 @@ public class UserController {
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
 
 }

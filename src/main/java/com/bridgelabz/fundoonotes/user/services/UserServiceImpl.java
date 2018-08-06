@@ -163,7 +163,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void sendMail(MailUser mail) throws MessagingException, ChangePassException {
+	public void forgetPassword(MailUser mail) throws MessagingException, ChangePassException {
 		
 		Optional<User> checkUser = elasticRepo.findByUserEmail(mail.getEmail());
 
@@ -173,8 +173,6 @@ public class UserServiceImpl implements UserService {
 		
 		String UUID = Utility.generate();
 		String mailBody = resetPassLink +UUID;
-		
-		System.out.println(UUID);
 		
 		MailDTO usermail = new MailDTO();
 		usermail.setEmail(mail.getEmail());

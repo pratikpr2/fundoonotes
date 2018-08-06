@@ -9,6 +9,7 @@ public class CreateDTO {
 	private String color;
 	private DateDto reminder;
 	private List<String> label;
+	private List<String> link;
 	
 	public DateDto getReminder() {
 		return reminder;
@@ -40,6 +41,12 @@ public class CreateDTO {
 	}
 	public void setBody(String body) {
 		this.body = body;
+	}
+	public List<String> getLink() {
+		return link;
+	}
+	public void setLink(List<String> link) {
+		this.link = link;
 	}
 	
 }

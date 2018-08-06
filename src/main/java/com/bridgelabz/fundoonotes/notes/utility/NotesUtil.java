@@ -1,7 +1,11 @@
 package com.bridgelabz.fundoonotes.notes.utility;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
@@ -9,6 +13,8 @@ import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
+import com.bridgelabz.fundoonotes.notes.model.URLMetadata;
+import com.bridgelabz.fundoonotes.user.exception.MalformedLinkException;
 
 public class NotesUtil {
 
@@ -69,4 +75,22 @@ public class NotesUtil {
 		return false;
 	}
 
+	public static URLMetadata getLinkMetaData(String link) throws MalformedLinkException {
+		Document doc;
+		try {
+			doc = Jsoup.connect(link).get();
+		} catch (IOException e) {
+			throw new MalformedLinkException("MalformedLink");
+		}  
+		
+		String description = doc.select("meta[name=description]").get(0).attr("content");  
+		String imageUrl =  doc.select("img[src~=(?i)\\.(png|jpe?g|gif)]").attr("src"); 
+		
+		URLMetadata urlData = new URLMetadata();
+		urlData.setUrl(link);
+		urlData.setDescription(description);
+		urlData.setImageUrl(imageUrl);
+		
+		return urlData;
+	}
 }

@@ -1,21 +1,17 @@
 package com.bridgelabz.fundoonotes.notes.services;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.bridgelabz.fundoonotes.notes.exceptions.CreateDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.EditDtoException;
 import com.bridgelabz.fundoonotes.notes.exceptions.InvalidDateFormatException;
 import com.bridgelabz.fundoonotes.notes.exceptions.LabelException;
-import com.bridgelabz.fundoonotes.notes.exceptions.LabelNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotFoundException;
 import com.bridgelabz.fundoonotes.notes.exceptions.NoteNotTrashedException;
 import com.bridgelabz.fundoonotes.notes.exceptions.UnauthorizedUserException;
 import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
-import com.bridgelabz.fundoonotes.notes.model.EditLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
-import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.user.exception.MalformedLinkException;
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
