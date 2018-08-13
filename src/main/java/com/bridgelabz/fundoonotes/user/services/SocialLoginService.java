@@ -56,7 +56,7 @@ public class SocialLoginService {
 	    if(!mongoRepo.findByUserEmail(user.getEmail()).isPresent()) {
 	    	
 	    	regUser.setUserEmail(user.getEmail());
-	    	
+	    	regUser.setStatus(true);
 	    	mongoRepo.save(regUser);
 	    }
 	    return jwt.createJWT(regUser);
