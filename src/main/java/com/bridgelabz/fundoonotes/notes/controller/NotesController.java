@@ -1,6 +1,5 @@
 package com.bridgelabz.fundoonotes.notes.controller;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +25,6 @@ import com.bridgelabz.fundoonotes.notes.model.CreateDTO;
 import com.bridgelabz.fundoonotes.notes.model.DateDto;
 import com.bridgelabz.fundoonotes.notes.model.EditNoteDto;
 import com.bridgelabz.fundoonotes.notes.model.NoteResponseDto;
-import com.bridgelabz.fundoonotes.notes.model.ViewLabelDto;
 import com.bridgelabz.fundoonotes.notes.model.ViewNoteDto;
 import com.bridgelabz.fundoonotes.notes.services.NotesService;
 import com.bridgelabz.fundoonotes.user.exception.MalformedLinkException;

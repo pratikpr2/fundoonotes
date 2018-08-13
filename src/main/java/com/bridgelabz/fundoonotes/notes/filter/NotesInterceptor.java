@@ -24,11 +24,10 @@ public class NotesInterceptor implements HandlerInterceptor {
 			HttpServletResponse response, Object object) throws Exception {
 		String token = request.getHeader("token");
 		String userId = jwt.getUserId(token);
-		//System.out.println(userId);
+		
 		if(repo.findById(userId).isPresent()) {
-			//System.out.println(jwt.getUserId(token));
-			request.setAttribute("userId",jwt.getUserId(token));
 			
+			request.setAttribute("userId",jwt.getUserId(token));
 			return true;
 			
 		}

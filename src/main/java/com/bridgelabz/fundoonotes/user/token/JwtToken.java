@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundoonotes.user.exception.TokenParsingException;
@@ -17,7 +18,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Service
 public class JwtToken {
 
-	final static String KEY = "PRATIK";
+	@Value("${mykey}")
+	String KEY;
 
 	/**
 	 * Method to create token
